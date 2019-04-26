@@ -57,10 +57,13 @@ void PythonVisitor::visit(ForNode& node)
 
     output << "for ";
 
-    std::string iter_name = "_i";
-    iter_name += std::to_string(indent);
+    node.iterator.get()->visit(*this);
 
-    output << iter_name << " in ";
+    // std::string iter_name = "_i";
+    // iter_name += std::to_string(indent);
+    // output << iter_name << " in ";
+
+    output << " in ";
     if (node.recursive) {
         output << "_chain(*[_f for _, _, _f in _walk(";
         node.path.get()->visit(*this);
@@ -72,15 +75,16 @@ void PythonVisitor::visit(ForNode& node)
         node.path.get()->visit(*this);
         output << "+_f)):";
     }
+    output << std::endl;
 
-    for (auto i = 0; i < indent; ++i)
-        output << "     ";
-    node.iterator.get()->visit(*this);
-    output << " = " << iter_name;
+    // for (auto i = 0; i < indent; ++i)
+    //     output << "     ";
+    // node.iterator.get()->visit(*this);
+    // output << " = " << iter_name;
 
     for (auto& cmd : node.cmds) {
         for (auto i = 0; i < indent; ++i)
-            output << "     ";
+            output << "    ";
         cmd.get()->visit(*this);
         output << "\n";
     }

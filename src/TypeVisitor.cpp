@@ -72,7 +72,7 @@ void TypeVisitor::visit(ForNode& node)
         node.path.get()->ftype);
 
     auto iter = node.iterator.get()->token.value().text;
-    sym_table.front()[iter] = FullType(ExprType::Image);
+    sym_table.front()[iter] = FullType(ExprType::Path);
     for (auto& cmd : node.cmds) {
         cmd.get()->visit(*this);
     }

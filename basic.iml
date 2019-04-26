@@ -1,9 +1,0 @@
-p = "me.png"
-img = image in (p)
-rotate img by -180
-subimg = crop (2, 2, 10, 10) from img
-resize img to (100, 100)
-resize img by 0.5
-flip img vertically
-modify img contrast by 5
-print 0.5

@@ -445,7 +445,7 @@ const char* PythonVisitor::prog_header =
     "    rect_sz = (right-left, lower-upper)\n"
     "    pos = (left, upper)\n"
     "\n"
-    "    rect = Image.new(\"RGBA\", rect_sz, (255, 255, 255, 0))\n"
+    "    rect = Image.new(\"RGBA\", rect_sz, 4*(0,))\n"
     "    removed = img.copy()\n"
     "    removed.paste(rect, pos)\n"
     "\n"

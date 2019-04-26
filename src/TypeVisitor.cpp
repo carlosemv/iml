@@ -14,6 +14,8 @@ void TypeVisitor::visit(CropNode& node)
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);
+
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(DimensionsNode& node)
@@ -25,6 +27,10 @@ void TypeVisitor::visit(DimensionsNode& node)
     node.height.get()->visit(*this);
     check_num(node.height.get()->token,
         node.height.get()->ftype);
+
+    node.ftype = FullType(ExprType::Dimensions);
+    node.ftype.list_types = {node.width.get()->ftype,
+        node.height.get()->ftype};
 }
 
 void TypeVisitor::visit(ExportNode& node)
@@ -43,6 +49,8 @@ void TypeVisitor::visit(FlipNode& node)
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);
+
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(ForNode& node)
@@ -68,7 +76,7 @@ void TypeVisitor::visit(ImportNode& node)
     check_path(node.path.get()->token,
         node.path.get()->ftype);
 
-    node.ftype.type = ExprType::Image;
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(ModifyNode& node)
@@ -80,6 +88,8 @@ void TypeVisitor::visit(ModifyNode& node)
     node.factor.get()->visit(*this);
     check_num(node.factor.get()->token,
         node.factor.get()->ftype);
+
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(ResizeNode& node)
@@ -96,6 +106,8 @@ void TypeVisitor::visit(ResizeNode& node)
         check_num(node.resize.get()->token,
             node.resize.get()->ftype);
     }
+
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(RotateNode& node)
@@ -107,6 +119,8 @@ void TypeVisitor::visit(RotateNode& node)
     node.rotation.get()->visit(*this);
     check_num(node.rotation.get()->token,
         node.rotation.get()->ftype);
+
+    node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(SectionNode& node)
@@ -126,6 +140,14 @@ void TypeVisitor::visit(SectionNode& node)
     node.lower.get()->visit(*this);
     check_num(node.lower.get()->token,
         node.lower.get()->ftype);
+
+    node.ftype = FullType(ExprType::Section);
+    node.ftype.list_types = {
+        node.left.get()->ftype,
+        node.upper.get()->ftype,
+        node.right.get()->ftype,
+        node.lower.get()->ftype
+    };
 }
 
 void TypeVisitor::visit(UnOpNode& node)

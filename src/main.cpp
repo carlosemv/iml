@@ -3,6 +3,7 @@
 #include <fstream>
 #include <optional>
 
+#include "ProgramLexer.h"
 #include "CompilerExceptions.h"
 #include "ProgramParser.h"
 #include "AST/ProgramNode.h"

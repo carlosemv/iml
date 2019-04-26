@@ -200,7 +200,7 @@ void PythonVisitor::visit(BinOpNode& node)
         throw CompilerException("Binary operation"\
             " has no defining token\n");
 
-    auto lhs = node.rhs.get()->ftype;
+    auto lhs = node.lhs.get()->ftype;
     auto rhs = node.rhs.get()->ftype;
     std::optional<std::string> func_call;
     std::optional<std::string> operation;

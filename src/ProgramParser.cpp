@@ -149,31 +149,7 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
 
 std::unique_ptr<ExprNode> ProgramParser::expression()
 {
-    switch (curr_token.type)
-    {
-        case ProgramLexer::IMAGE_T:
-            return import_expr();
-        case ProgramLexer::ID_T:
-        case ProgramLexer::INTEGER_T:
-        case ProgramLexer::FLOAT_T:
-        case ProgramLexer::PATH_T:
-        case ProgramLexer::MINUS_T:
-            return arith_expr();
-        case ProgramLexer::ROTATE_T:
-        case ProgramLexer::RESIZE_T:
-        case ProgramLexer::CROP_T:
-        case ProgramLexer::FLIP_T:
-        case ProgramLexer::MODIFY_T:
-            return img_expr();
-        case ProgramLexer::LPAREN_T:
-            if (peek(2).type == ProgramLexer::SEP_T)
-                return shape_expr();
-            else
-                return arith_expr();
-        default:
-            throw_unexpected("expression");
-    }
-    return nullptr;
+    return arith_expr();
 }
 
 std::unique_ptr<ExprNode> ProgramParser::img_expr()
@@ -311,7 +287,6 @@ std::unique_ptr<ExprNode> ProgramParser::arith_expr()
 
     Token op_tok = curr_token;
     while (match({ProgramLexer::PLUS_T, ProgramLexer::MINUS_T})) {
-        skip();
         root = std::make_unique<BinOpNode>(
             BinOpNode(std::move(root), op_tok, term()));
         op_tok = curr_token;
@@ -396,14 +371,24 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
             skip();
             return std::make_unique<IdNode>(node);
         }
+        case ProgramLexer::IMAGE_T:
+            return import_expr();
+        case ProgramLexer::ROTATE_T:
+        case ProgramLexer::RESIZE_T:
+        case ProgramLexer::CROP_T:
+        case ProgramLexer::FLIP_T:
+        case ProgramLexer::MODIFY_T:
+            return img_expr();
         case ProgramLexer::LPAREN_T:
-        {
-            skip();
-            std::unique_ptr<ExprNode> root = expression();
-            if (not match(ProgramLexer::RPAREN_T))
-                throw_unexpected(ProgramLexer::RPAREN_T);
-            return root;
-        }
+            if (peek(2).type == ProgramLexer::SEP_T) {
+                return shape_expr();
+            } else {
+                skip();
+                std::unique_ptr<ExprNode> root = expression();
+                if (not match(ProgramLexer::RPAREN_T))
+                    throw_unexpected(ProgramLexer::RPAREN_T);
+                return root;
+            }
         default:
             throw_unexpected("primary expression");
     }

@@ -3,13 +3,11 @@
 #include <fstream>
 #include <optional>
 
-#include "ProgramLexer.h"
-#include "PrintVisitor.h"
 #include "CompilerExceptions.h"
 #include "ProgramParser.h"
 #include "AST/ProgramNode.h"
 #include "TypeVisitor.h"
-// #include "PythonVisitor.h"
+#include "PythonVisitor.h"
 
 std::string read_file(std::string filename)
 {
@@ -41,19 +39,17 @@ std::optional<ProgramNode> parse(std::string input)
 
 bool generate_py(ProgramNode& root, std::string out_file)
 {
-    PrintVisitor print_vis;
     TypeVisitor tv;
-    // PythonVisitor pv;
+    PythonVisitor pv;
 
     try {
-        print_vis.visit(root);
         tv.visit(root);
-        // pv.visit(root);
+        pv.visit(root);
         std::cout << "Successfully compiled\n";
-        // std::ofstream out(out_file, std::ios::out);
-        // out << pv.output.str();
-        // std::cout << "Output written to " << out_file
-            // << std::endl;
+        std::ofstream out(out_file, std::ios::out);
+        out << pv.output.str();
+        std::cout << "Output written to " << out_file
+            << std::endl;
         return true;
     } catch (SemanticException& e) {
         std::cerr << "[Semantic Error] ";
@@ -74,12 +70,6 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    // ProgramLexer pl(input);
-    // Token t;
-    // do {
-    //     t = pl.next_token();
-    //     std::cout << "<" << pl.token_name(t.type) << "> ";
-    // } while (t.type != ProgramLexer::EOF_T);
     std::string input = read_file(argv[1]);
     std::string output = argv[2];
 

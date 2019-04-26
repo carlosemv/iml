@@ -25,7 +25,7 @@ _OBJ = Token.o Lexer.o ProgramLexer.o Parser.o ProgramParser.o FullType.o \
 	AST/ForNode.o AST/DimensionsNode.o AST/AssignNode.o AST/ProgramNode.o \
 	AST/CommandNode.o AST/ExprNode.o AST/FlipNode.o AST/ResizeNode.o \
 	AST/RotateNode.o AST/CropNode.o AST/ModifyNode.o AST/ASTVisitor.o \
-	PrintVisitor.o TypeVisitor.o main.o
+	PrintVisitor.o TypeVisitor.o PythonVisitor.o main.o
 OBJ = $(patsubst %,$(BINDIR)%,$(_OBJ))
 
 ### executable target

@@ -2,81 +2,157 @@
 #include "ProgramLexer.h"
 #include "CompilerExceptions.h"
 
-void TypeVisitor::visit(CropNode& node)
+PythonVisitor::PythonVisitor() : indent(0)
+{}
+
+void PythonVisitor::visit(CropNode& node)
 {
+    output << "_crop(";
+    node.image.get()->visit(*this);
+    output << ", ";
     node.section.get()->visit(*this);
-    node.image.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(DimensionsNode& node)
+void PythonVisitor::visit(DimensionsNode& node)
 {
+    output << "(";
     node.width.get()->visit(*this);
+    output << ",";
     node.height.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(ExportNode& node)
+void PythonVisitor::visit(ExportNode& node)
 {
     node.image.get()->visit(*this);
+    output << ".save(";
     node.path.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(FlipNode& node)
+void PythonVisitor::visit(FlipNode& node)
 {
-    node.image.get()->visit(*this);
-}
-
-void TypeVisitor::visit(ForNode& node)
-{
-    sym_table.emplace_front();
-
-    node.iterator.get()->visit(*this);
-    node.path.get()->visit(*this);
-
-    for (auto& cmd : node.cmds) {
-        cmd.get()->visit(*this);
+    if (node.command) {
+        node.image.get()->visit(*this);
+        output << " = ";
     }
 
-    sym_table.pop_front();
+    node.image.get()->visit(*this);
+    output << ".transpose(Image.";
+    if (node.dir == FlipDirection::Horizontal)
+        output << "FLIP_LEFT_RIGHT)";
+    else
+        output << "FLIP_TOP_BOTTOM)"; 
 }
 
-void TypeVisitor::visit(ImportNode& node)
+void PythonVisitor::visit(ForNode& node)
 {
+    indent++;
+
+    output << "for ";
+
+    std::string iter_name = "_i";
+    iter_name += std::to_string(indent);
+
+    output << iter_name << " in ";
+    if (node.recursive) {
+        output << "_chain(*[_f for _, _, _f in _walk(";
+        node.path.get()->visit(*this);
+        output << ")]):";
+    } else {
+        output << "(_f for _f in _listdir(";
+        node.path.get()->visit(*this);
+        output << ") if _isfile(";
+        node.path.get()->visit(*this);
+        output << "+_f)):";
+    }
+
+    for (auto i = 0; i < indent; ++i)
+        output << "     ";
+    node.iterator.get()->visit(*this);
+    output << " = " << iter_name;
+
+    for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            output << "     ";
+        cmd.get()->visit(*this);
+        output << "\n";
+    }
+
+    indent--;
+}
+
+void PythonVisitor::visit(ImportNode& node)
+{
+    output << "Image.open(";
     node.path.get()->visit(*this);
-    auto path_type = node.path.get()->ftype;
-    if (path_type.type != ExprType::Path)
-        throw SemanticException("Expression has invalid type "
-            + path_type.to_string() + "; expected a Path");
-
-    node.ftype.type = ExprType::Image;
+    output << ").convert(\"RGBA\")";
 }
 
-void TypeVisitor::visit(ModifyNode& node)
+void PythonVisitor::visit(ModifyNode& node)
 {
+    if (node.command) {
+        node.image.get()->visit(*this);
+        output << " = ";
+    }
+
+    output << "ImageEnhance." << node.mod_name() << "(";
     node.image.get()->visit(*this);
+    output << ").enhance(";
     node.factor.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(ResizeNode& node)
+void PythonVisitor::visit(ResizeNode& node)
 {
+    if (node.command) {
+        node.image.get()->visit(*this);
+        output << " = ";
+    }
+
+    output << "_resize(";
     node.image.get()->visit(*this);
-    node.resize.get()->visit(*this);
+    output << ", ";
+    if (node.resize_type == ResizeType::Absolute) {
+        node.resize.get()->visit(*this);
+    } else {
+        output << "tuple(";
+        node.resize.get()->visit(*this);
+        output << " * dim for dim in ";
+        node.image.get()->visit(*this);
+        output << ".size)";
+    }
+    output << ")";
 }
 
-void TypeVisitor::visit(RotateNode& node)
+void PythonVisitor::visit(RotateNode& node)
 {
+    if (node.command) {
+        node.image.get()->visit(*this);
+        output << " = ";
+    }
+
     node.image.get()->visit(*this);
+    output << ".rotate(";
     node.rotation.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(SectionNode& node)
+void PythonVisitor::visit(SectionNode& node)
 {
+    output << "(";
     node.left.get()->visit(*this);
+    output << ", ";
     node.upper.get()->visit(*this);
+    output << ", ";
     node.right.get()->visit(*this);
+    output << ", ";
     node.lower.get()->visit(*this);
+    output << ")";
 }
 
-void TypeVisitor::visit(UnOpNode& node)
+void PythonVisitor::visit(UnOpNode& node)
 {
     if (node.token) {
         auto op = node.token.value();
@@ -124,14 +200,149 @@ void PythonVisitor::visit(BinOpNode& node)
         throw CompilerException("Binary operation"\
             " has no defining token\n");
 
+    auto lhs = node.rhs.get()->ftype;
+    auto rhs = node.rhs.get()->ftype;
     std::optional<std::string> func_call;
     std::optional<std::string> operation;
     bool invert = false;
 
     switch (node.token.value().type) {
-        case ProgramLexer::DOT_T:
+       case ProgramLexer::PLUS_T:
+            if (lhs.type == ExprType::Image
+                and rhs.type == ExprType::Image) {
+                func_call = "_add";
+            } else if (lhs.is_num() and rhs.is_num()) {
+                operation = "+";
+            } else if (lhs.type == rhs.type
+                and lhs.type == ExprType::Path) {
+                operation = "+";
+            } else if (lhs.type == rhs.type
+                and lhs.is_list()) {
+                output << "tuple(_a+_b for _a,_b in zip(";
+                node.lhs.get()->visit(*this);
+                output << ",";
+                node.rhs.get()->visit(*this);
+                output << "))";
+            } else if (lhs.is_list() and rhs.is_num()) {
+                output << "tuple(";
+                node.rhs.get()->visit(*this);
+                output << " + _c for _c in ";
+                node.lhs.get()->visit(*this);
+                output << ")";
+            } else if (rhs.is_list() and lhs.is_num()) {
+                output << "tuple(";
+                node.lhs.get()->visit(*this);
+                output << " + _c for _c in ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (lhs.type == ExprType::Image
+                and rhs.is_num()) {
+                node.lhs.get()->visit(*this);
+                output << ".point(lambda i: i + ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (rhs.type == ExprType::Image
+                and lhs.is_num()) {
+                node.rhs.get()->visit(*this);
+                output << ".point(lambda i: i + ";
+                node.lhs.get()->visit(*this);
+                output << ")";
+            }
             break;
-        case ProgramLexer::PLUS_T:
+        case ProgramLexer::MINUS_T:
+            if (lhs.type == ExprType::Image
+                and rhs.type == ExprType::Image) {
+                func_call = "_sub";
+            } else if (lhs.is_num() and rhs.is_num()) {
+                operation = "-";
+            } else if (lhs.type == ExprType::Image
+                and rhs.type == ExprType::Section) {
+                output << "_rm_sec(";
+                node.lhs.get()->visit(*this);
+                output << ", ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (rhs.type == ExprType::Image
+                and lhs.type == ExprType::Section) {
+                output << "_rm_sec(";
+                node.rhs.get()->visit(*this);
+                output << ", ";
+                node.lhs.get()->visit(*this);
+                output << ", reverse=True)";
+            } else if (lhs.type == rhs.type
+                and lhs.is_list()) {
+                output << "tuple(abs(_a-_b) for _a,_b in zip(";
+                node.lhs.get()->visit(*this);
+                output << ",";
+                node.rhs.get()->visit(*this);
+                output << "))";
+            }
+            break;
+        case ProgramLexer::MULT_T:
+            if (lhs.type == ExprType::Image
+                and rhs.type == ExprType::Image) {
+                func_call = "_mult";
+            } else if (lhs.is_num() and rhs.is_num()) {
+                operation = "*";
+            } else if (lhs.type == ExprType::Image
+                and rhs.is_num()) {
+                node.lhs.get()->visit(*this);
+                output << ".point(lambda i: i * ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (rhs.type == ExprType::Image
+                and lhs.is_num()) {
+                node.rhs.get()->visit(*this);
+                output << ".point(lambda i: i * ";
+                node.lhs.get()->visit(*this);
+                output << ")";
+            } else if (lhs.is_list() and rhs.is_num()) {
+                output << "tuple(";
+                node.rhs.get()->visit(*this);
+                output << " * _c for _c in ";
+                node.lhs.get()->visit(*this);
+                output << ")";
+            } else if (rhs.is_list() and lhs.is_num()) {
+                output << "tuple(";
+                node.lhs.get()->visit(*this);
+                output << " * _c for _c in ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (lhs.type == rhs.type
+                and lhs.is_list()) {
+                output << "tuple(_a*_b for _a,_b in zip(";
+                node.lhs.get()->visit(*this);
+                output << ",";
+                node.rhs.get()->visit(*this);
+                output << "))";
+            }
+            break;
+        case ProgramLexer::DIV_T:
+            if (lhs.type == ExprType::Image
+                and rhs.type == ExprType::Image) {
+                func_call = "_div";
+            } else if (lhs.is_num() and rhs.is_num()) {
+                operation = "/";
+            } else if (lhs.type == ExprType::Image
+                and rhs.is_num()) {
+                node.lhs.get()->visit(*this);
+                output << ".point(lambda i: i / ";
+                node.rhs.get()->visit(*this);
+                output << ")";
+            } else if (lhs.is_list() and rhs.is_num()) {
+                output << "tuple(";
+                node.rhs.get()->visit(*this);
+                output << " / _c for _c in ";
+                node.lhs.get()->visit(*this);
+                output << ")";
+            } else if (lhs.type == rhs.type
+                and lhs.is_list()) {
+                output << "tuple(_a/_b for _a,_b in zip(";
+                node.lhs.get()->visit(*this);
+                output << ",";
+                node.rhs.get()->visit(*this);
+                output << "))";
+            }
             break;
         default:
             throw CompilerException("Binary operation at "
@@ -182,11 +393,11 @@ void PythonVisitor::visit(ScalarNode& node)
 {
     if (node.token) {
         if (node.ftype.type == ExprType::Path) {
-            std::cout << '"';
-            std::cout << node.token.value().text;
-            std::cout << '"';
+            output << '"';
+            output << node.token.value().text;
+            output << '"';
         } else {
-            std::cout << node.token.value().text;
+            output << node.token.value().text;
         }
     } else {
         throw CompilerException("Scalar node has no token\n");
@@ -194,23 +405,33 @@ void PythonVisitor::visit(ScalarNode& node)
 }
 
 const char* PythonVisitor::prog_header = 
+    "from os import walk as _walk\n"
+    "from os import listdir as _listdir\n"
+    "from os.path import isfile as _isfile\n"
+    "from itertools import chain as _chain\n"
     "from PIL import Image, ImageEnhance, ImageChops, ImageFile\n"
     "ImageFile.LOAD_TRUNCATED_IMAGES = True\n"
     "\n"
+    "def _resize(img, dims):\n"
+    "    return img.resize(tuple(int(c) for c in dims))\n"
+    "\n"
+    "def _crop(img, sec):\n"
+    "    return img.crop(tuple(int(b) for b in sec))\n"
+    "\n"
     "def _add(img1, img2):\n"
-    "   result = img1.copy()\n"
-    "   result.paste(img2)\n"
-    "   return result\n"
+    "    result = img1.copy()\n"
+    "    result.paste(img2)\n"
+    "    return result\n"
     "\n"
     "def _sub(img1, img2):\n"
-    "   return ImageChops.difference(img1, img2)\n"
+    "    return ImageChops.difference(img1, img2)\n"
     "\n"
     "def _mult(img1, img2):\n"
-    "   return ImageChops.blend(img1, img2, 0.5)\n"
+    "    return ImageChops.blend(img1, img2, 0.5)\n"
     "\n"
     "def _div(img1, img2):\n"
-    "   return _mult(img1, _inv(img2))\n"
-    "   \n"
+    "    return _mult(img1, _inv(img2))\n"
+    "    \n"
     "def _inv(img):\n"
     "    *rgb, a = img.split()\n"
     "    img_rgb = Image.merge('RGB', rgb)\n"
@@ -218,5 +439,19 @@ const char* PythonVisitor::prog_header =
     "    img_inv.putalpha(a)\n"
     "\n"
     "    return img_inv\n"
+    "\n"
+    "def _rm_sec(img, sec, reverse=False):\n"
+    "    left, upper, right, lower = sec\n"
+    "    rect_sz = (right-left, lower-upper)\n"
+    "    pos = (left, upper)\n"
+    "\n"
+    "    rect = Image.new(\"RGBA\", rect_sz, (255, 255, 255, 0))\n"
+    "    removed = img.copy()\n"
+    "    removed.paste(rect, pos)\n"
+    "\n"
+    "    if not reverse:\n"
+    "        return removed\n"
+    "    else:\n"
+    "        return _inv(_sub(img, removed))\n"
     "\n"
     "\n";

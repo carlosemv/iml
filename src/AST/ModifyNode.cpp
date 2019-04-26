@@ -19,15 +19,15 @@ std::string ModifyNode::mod_name()
 {
     switch (mod) {
         case Modification::Sharpness:
-            return "sharpness";
+            return "Sharpness";
         case Modification::Brightness:
-            return "brightness";
+            return "Brightness";
         case Modification::Contrast:
-            return "contrast";
+            return "Contrast";
         case Modification::Color:
-            return "color";
+            return "Color";
         default:
-            return "?";
+            return "";
     }
 }
 

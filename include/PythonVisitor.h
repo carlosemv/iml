@@ -10,6 +10,8 @@ class PythonVisitor : public ASTVisitor
 public:
     std::ostringstream output;
 
+    PythonVisitor();
+
     void visit(AssignNode& node);
     void visit(BinOpNode& node);
     void visit(CropNode& node);
@@ -30,6 +32,7 @@ public:
     
 private:
     static const char* prog_header;
+    int indent;
 };
 
 #endif

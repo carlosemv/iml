@@ -7,6 +7,11 @@ PythonVisitor::PythonVisitor() : indent(0)
 
 void PythonVisitor::visit(CropNode& node)
 {
+    if (node.command) {
+        node.image.get()->visit(*this);
+        output << " = ";
+    }
+    
     output << "_crop(";
     node.image.get()->visit(*this);
     output << ", ";
@@ -202,6 +207,7 @@ void PythonVisitor::visit(BinOpNode& node)
     std::optional<std::string> func_call;
     std::optional<std::string> operation;
     bool invert = false;
+    bool invalid = false;
 
     switch (node.token.value().type) {
        case ProgramLexer::PLUS_T:
@@ -244,6 +250,8 @@ void PythonVisitor::visit(BinOpNode& node)
                 output << ".point(lambda i: i + ";
                 node.lhs.get()->visit(*this);
                 output << ")";
+            } else {
+                invalid = true;
             }
             break;
         case ProgramLexer::MINUS_T:
@@ -273,6 +281,8 @@ void PythonVisitor::visit(BinOpNode& node)
                 output << ",";
                 node.rhs.get()->visit(*this);
                 output << "))";
+            } else {
+                invalid = true;
             }
             break;
         case ProgramLexer::MULT_T:
@@ -312,6 +322,15 @@ void PythonVisitor::visit(BinOpNode& node)
                 output << ",";
                 node.rhs.get()->visit(*this);
                 output << "))";
+            } else if (lhs.type == ExprType::Section
+                and rhs.type == ExprType::Dimensions) {
+                func_call = "_scale";
+            } else if (rhs.type == ExprType::Section
+                and lhs.type == ExprType::Dimensions) {
+                func_call = "_scale";
+                invert = true;
+            } else {
+                invalid = true;
             }
             break;
         case ProgramLexer::DIV_T:
@@ -339,6 +358,8 @@ void PythonVisitor::visit(BinOpNode& node)
                 output << ",";
                 node.rhs.get()->visit(*this);
                 output << "))";
+            } else {
+                invalid = true;
             }
             break;
         default:
@@ -346,6 +367,13 @@ void PythonVisitor::visit(BinOpNode& node)
                 + node.token.value().pos_string()
                 + " has invalid token type");
     }
+
+    if (invalid)
+        throw CompilerException("Undefined operation \""
+            + node.token.value().text + "\" at "
+            + node.token.value().pos_string()
+            + " between " + lhs.to_string() + " and "
+            + rhs.to_string());
 
     if (func_call) {
         output << func_call.value() << "(";
@@ -439,8 +467,8 @@ const char* PythonVisitor::prog_header =
     "\n"
     "def _rm_sec(img, sec, reverse=False):\n"
     "    left, upper, right, lower = sec\n"
-    "    rect_sz = (right-left, lower-upper)\n"
-    "    pos = (left, upper)\n"
+    "    rect_sz = (int(right-left), int(lower-upper))\n"
+    "    pos = (int(left), int(upper))\n"
     "\n"
     "    rect = Image.new(\"RGBA\", rect_sz, 4*(0,))\n"
     "    removed = img.copy()\n"
@@ -450,5 +478,8 @@ const char* PythonVisitor::prog_header =
     "        return removed\n"
     "    else:\n"
     "        return _inv(_sub(img, removed))\n"
+    "\n"
+    "def _scale(section, dims):\n"
+    "    return tuple(b*d for b, d in zip(section, 2*dims))\n"
     "\n"
     "\n";

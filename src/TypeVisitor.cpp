@@ -7,6 +7,11 @@ TypeVisitor::TypeVisitor() : sym_table(1)
 
 void TypeVisitor::visit(CropNode& node)
 {
+    if (node.command) {
+        check_id(node.image.get()->token,
+            node.image.get()->ftype);
+    }
+
     node.section.get()->visit(*this);
     check_section(node.section.get()->token,
         node.section.get()->ftype);
@@ -46,6 +51,11 @@ void TypeVisitor::visit(ExportNode& node)
 
 void TypeVisitor::visit(FlipNode& node)
 {
+    if (node.command) {
+        check_id(node.image.get()->token,
+            node.image.get()->ftype);
+    }
+
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);
@@ -81,6 +91,11 @@ void TypeVisitor::visit(ImportNode& node)
 
 void TypeVisitor::visit(ModifyNode& node)
 {
+    if (node.command) {
+        check_id(node.image.get()->token,
+            node.image.get()->ftype);
+    }
+
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);
@@ -94,6 +109,11 @@ void TypeVisitor::visit(ModifyNode& node)
 
 void TypeVisitor::visit(ResizeNode& node)
 {
+    if (node.command) {
+        check_id(node.image.get()->token,
+            node.image.get()->ftype);
+    }
+    
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);
@@ -112,6 +132,11 @@ void TypeVisitor::visit(ResizeNode& node)
 
 void TypeVisitor::visit(RotateNode& node)
 {
+    if (node.command) {
+        check_id(node.image.get()->token,
+            node.image.get()->ftype);
+    }
+
     node.image.get()->visit(*this);
     check_image(node.image.get()->token,
         node.image.get()->ftype);

@@ -26,6 +26,8 @@ struct FullType
     FullType(ExprType _type);
     FullType(const FullType& _ftype);
     std::string to_string() const;
+    bool is_num() const;
+    bool is_list() const;
 
     inline friend std::ostream& operator<<(std::ostream& out, const FullType& t)
     {

@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "ASTVisitor.h"
+#include "AST/ASTVisitor.h"
 
 class PythonVisitor : public ASTVisitor
 {

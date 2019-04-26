@@ -9,34 +9,54 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::INTEGER_T:
             case ProgramLexer::FLOAT_T:
             case ProgramLexer::PATH_T:
-                try {
-                    visit(dynamic_cast<ScalarNode&>(node));
-                } catch (std::bad_cast& e) {
-                    std::cerr << e.what() << " to ScalarNode\n";
-                }
+                cast_visit<ScalarNode&>(node, "ScalarNode");
+                break;
+            case ProgramLexer::SECTION_T:
+                cast_visit<SectionNode&>(node, "SectionNode");
+                break;
+            case ProgramLexer::DIMENSIONS_T:
+                cast_visit<DimensionsNode&>(node, "DimensionsNode");
                 break;
             case ProgramLexer::ID_T:
-                try {
-                    visit(dynamic_cast<IdNode&>(node));
-                } catch (std::bad_cast& e) {
-                    std::cerr << e.what() << " to IdNode\n";
-                }
+                cast_visit<IdNode&>(node, "IdNode");
                 break;
             case ProgramLexer::PLUS_T:
             case ProgramLexer::MINUS_T:
             case ProgramLexer::MULT_T:
             case ProgramLexer::DIV_T:
-                try {
-                    visit(dynamic_cast<BinOpNode&>(node));
-                } catch (std::bad_cast& e) {
-                    std::cerr << e.what() << " to BinOpNode\n";
-                }
+                cast_visit<BinOpNode&>(node, "BinOpNode");
+                break;
+            case ProgramLexer::UNMINUS_T:
+            case ProgramLexer::R_T:
+            case ProgramLexer::G_T:
+            case ProgramLexer::B_T:
+                cast_visit<UnOpNode&>(node, "UnOpNode");
+                break;
+            case ProgramLexer::IMAGE_T:
+                cast_visit<ImportNode&>(node, "ImportNode");
+                break;
+            case ProgramLexer::ROTATE_T:
+                cast_visit<RotateNode&>(node, "RotateNode");
+                break;
+            case ProgramLexer::RESIZE_T:
+                cast_visit<ResizeNode&>(node, "ResizeNode");
+                break;
+            case ProgramLexer::CROP_T:
+                cast_visit<CropNode&>(node, "CropNode");
+                break;
+            case ProgramLexer::FLIP_T:
+                cast_visit<FlipNode&>(node, "FlipNode");
+                break;
+            case ProgramLexer::MODIFY_T:
+                cast_visit<ModifyNode&>(node, "ModifyNode");
                 break;
             default:
-                std::cerr << ProgramLexer::get_token_name(
-                    node.token.value().type) << std::endl;
+            {
+                auto name = ProgramLexer::get_token_name(
+                    node.token.value().type);
                 throw std::logic_error("Expression has "\
-                    "unkown associated token type\n");
+                    "unkown associated token type \""+name+"\"\n");
+            }
         }
     } else {
         throw std::logic_error("Expression "\
@@ -49,24 +69,35 @@ void ASTVisitor::visit(CommandNode& node)
     if (node.token) {
         switch (node.token.value().type) {
             case ProgramLexer::ASSIGN_T:
-                try {
-                    visit(dynamic_cast<AssignNode&>(node));
-                } catch (std::bad_cast& e) {
-                    std::cerr << e.what() << " to AssignNode\n";
-                }
+                cast_visit<AssignNode&>(node, "AssignNode");
                 break;
             case ProgramLexer::PRINT_T:
+                cast_visit<PrintNode&>(node, "PrintNode");
+                break;
+            case ProgramLexer::SAVE_T:
+                cast_visit<ExportNode&>(node, "ExportNode");
+                break;
+            case ProgramLexer::FOR_T:
+                cast_visit<ForNode&>(node, "ForNode");
+                break;
+            case ProgramLexer::ROTATE_T:
+            case ProgramLexer::RESIZE_T:
+            case ProgramLexer::CROP_T:
+            case ProgramLexer::FLIP_T:
+            case ProgramLexer::MODIFY_T:
                 try {
-                    visit(dynamic_cast<PrintNode&>(node));
+                    auto& expr = dynamic_cast<ExprNode&>(node);
+                    expr.command = true;
+                    visit(expr);
                 } catch (std::bad_cast& e) {
-                    std::cerr << e.what() << " to PrintNode\n";
+                    std::cerr << e.what() << " to ExprNode\n";
                 }
                 break;
             default:
-                std::cerr << ProgramLexer::get_token_name(
-                    node.token.value().type) << std::endl;
+                auto name = ProgramLexer::get_token_name(
+                    node.token.value().type);
                 throw std::logic_error("Command has "\
-                    "unkown associated token type\n");
+                    "unkown associated token type \""+name+"\"\n");
         }
     } else {
         throw std::logic_error("Command "\

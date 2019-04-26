@@ -12,13 +12,13 @@ class ExprNode : public CommandNode
 protected:
     using expr_ptr = std::unique_ptr<ExprNode>;
 public:
-    // ExprNode(Token _t);
-    ExprNode(Token _t, ExprType _type);
+    ExprNode(Token _t, ExprType _type, bool _command=false);
     ExprNode& operator=(ExprNode other);
     virtual ~ExprNode() = default;
     void visit(ASTVisitor& visitor);
 
     FullType ftype;
+    bool command;
 };
 
 #endif

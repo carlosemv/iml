@@ -13,8 +13,7 @@ FullType::FullType(const FullType& _ftype) : type(_ftype.type),
 std::string FullType::to_string() const
 {
     std::ostringstream out;
-    if (type != ExprType::Dimensions
-        and type != ExprType::Section) {
+    if (not is_list()) {
         out << "<";
         switch (type) {
             case ExprType::Invalid:
@@ -34,14 +33,26 @@ std::string FullType::to_string() const
         }
         out << ">";
     } else {
-        out << "[";
+        out << "(";
         auto it = list_types.begin();
         for (; it != list_types.end(); ++it) {
             out << *it;
             if (it+1 != list_types.end())
                 out << ", ";
         }
-        out << "]";
+        out << ")";
     }
     return out.str();
+}
+
+bool FullType::is_num() const
+{
+    return (type == ExprType::Integer
+        or type == ExprType::Float);
+}
+
+bool FullType::is_list() const
+{
+    return (type == ExprType::Dimensions
+        or type == ExprType::Section);
 }

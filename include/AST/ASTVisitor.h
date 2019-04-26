@@ -7,6 +7,17 @@
 #include "BinOpNode.h"
 #include "IdNode.h"
 #include "ScalarNode.h"
+#include "CropNode.h"
+#include "DimensionsNode.h"
+#include "ExportNode.h"
+#include "FlipNode.h"
+#include "ForNode.h"
+#include "ImportNode.h"
+#include "ResizeNode.h"
+#include "RotateNode.h"
+#include "SectionNode.h"
+#include "UnOpNode.h"
+#include "ModifyNode.h"
 
 class ProgramNode;
 class ASTVisitor
@@ -31,6 +42,17 @@ public:
     virtual void visit(ScalarNode& node) = 0;
     virtual void visit(SectionNode& node) = 0;
     virtual void visit(UnOpNode& node) = 0;
+
+protected:
+    template <class T, class N>
+    void cast_visit(N& node, std::string name)
+    {
+        try {
+            visit(dynamic_cast<T&>(node));
+        } catch (std::bad_cast& e) {
+            std::cerr << e.what() << " to "+name+"\n";
+        }
+    }
 };
 
 #endif

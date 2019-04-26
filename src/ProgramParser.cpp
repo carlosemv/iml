@@ -287,7 +287,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
         if (not match(ProgramLexer::RPAREN_T))
             throw_unexpected(ProgramLexer::RPAREN_T);
 
-        return std::make_unique<ExprNode>(DimensionsNode(
+        return std::make_unique<DimensionsNode>(DimensionsNode(
             ProgramLexer::DIMENSIONS_T,
             std::move(components[0]), std::move(components[1])));
     }
@@ -338,6 +338,7 @@ std::unique_ptr<ExprNode> ProgramParser::factor()
 {
     Token op_tok = curr_token;
     if (match(ProgramLexer::MINUS_T)) {
+        op_tok.type = ProgramLexer::UNMINUS_T;
         return std::make_unique<UnOpNode>(
             UnOpNode(op_tok, factor()));
     }

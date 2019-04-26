@@ -4,7 +4,8 @@
 // ExprNode::ExprNode(Token _t) : AST(_t), type(ExprType::Invalid)
 // {}
 
-ExprNode::ExprNode(Token _t, ExprType _type) : CommandNode(_t), ftype(_type)
+ExprNode::ExprNode(Token _t, ExprType _type, bool _command) :
+    CommandNode(_t), ftype(_type), command(_command)
 {}
 
 ExprNode& ExprNode::operator=(ExprNode other)

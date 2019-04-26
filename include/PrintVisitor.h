@@ -2,11 +2,13 @@
 #define __PRINT_VISITOR_H__
 
 #include <iostream>
-#include "ASTVisitor.h"
+#include "AST/ASTVisitor.h"
 
 class PrintVisitor : public ASTVisitor
 {
 public:
+    PrintVisitor();
+
     void visit(AssignNode& node);
     void visit(BinOpNode& node);
     void visit(CropNode& node);
@@ -24,6 +26,9 @@ public:
     void visit(ScalarNode& node);
     void visit(SectionNode& node);
     void visit(UnOpNode& node);
+
+private:
+    int indent;
 };
 
 #endif

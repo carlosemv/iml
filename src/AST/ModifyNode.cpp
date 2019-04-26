@@ -18,13 +18,13 @@ ModifyNode::ModifyNode(Token _t, Modification _mod,
 std::string ModifyNode::mod_name()
 {
     switch (mod) {
-        case Sharpness:
+        case Modification::Sharpness:
             return "sharpness";
-        case Brightness:
+        case Modification::Brightness:
             return "brightness";
-        case Contrast:
+        case Modification::Contrast:
             return "contrast";
-        case Color:
+        case Modification::Color:
             return "color";
         default:
             return "?";

@@ -1,5 +1,9 @@
 #include "PrintVisitor.h"
 #include "ProgramLexer.h"
+#include "CompilerExceptions.h"
+
+PrintVisitor::PrintVisitor() : indent(0)
+{}
 
 void PrintVisitor::visit(CropNode& node)
 {
@@ -38,6 +42,8 @@ void PrintVisitor::visit(FlipNode& node)
 
 void PrintVisitor::visit(ForNode& node)
 {
+    indent++;
+
     std::cout << "for ";
     if (node.recursive)
         std::cout << "all ";
@@ -47,10 +53,14 @@ void PrintVisitor::visit(ForNode& node)
 
     std::cout << " {" << std::endl;
     for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            std::cout << "    ";
         cmd.get()->visit(*this);
         std::cout << std::endl;
     }
     std::cout << "}";
+
+    indent--;
 }
 
 void PrintVisitor::visit(ImportNode& node)
@@ -102,7 +112,8 @@ void PrintVisitor::visit(SectionNode& node)
 void PrintVisitor::visit(UnOpNode& node)
 {
     if (node.token) {
-        if (node.token.type == ProgramLexer::MINUS_T) {
+        auto type = node.token.value().type;
+        if (type == ProgramLexer::UNMINUS_T) {
             std::cout << node.token.value().text;
             node.expr.get()->visit(*this);
         } else {
@@ -110,7 +121,7 @@ void PrintVisitor::visit(UnOpNode& node)
             std::cout << "(" << node.token.value().text << ")";
         }
     } else {
-        throw std::logic_error("Unary operation"\
+        throw CompilerException("Unary operation"\
             " has no defining token\n");
     }
 }
@@ -136,7 +147,7 @@ void PrintVisitor::visit(BinOpNode& node)
         std::cout << node.token.value().text;
         std::cout << " ";
     } else {
-        throw std::logic_error("Binary operation"\
+        throw CompilerException("Binary operation"\
             " has no defining token\n");
     }
     node.rhs.get()->visit(*this);
@@ -147,7 +158,7 @@ void PrintVisitor::visit(IdNode& node)
     if (node.token) {
         std::cout << node.token.value().text;
     } else {
-        throw std::logic_error("Id node has no token\n");
+        throw CompilerException("Id node has no token\n");
     }
 }
 
@@ -162,8 +173,14 @@ void PrintVisitor::visit(ProgramNode& node)
 void PrintVisitor::visit(ScalarNode& node)
 {
     if (node.token) {
-        std::cout << node.token.value().text;
+        if (node.ftype.type == ExprType::Path) {
+            std::cout << '"';
+            std::cout << node.token.value().text;
+            std::cout << '"';
+        } else {
+            std::cout << node.token.value().text;
+        }
     } else {
-        throw std::logic_error("Scalar node has no token\n");
+        throw CompilerException("Scalar node has no token\n");
     }  
 }

@@ -66,9 +66,10 @@ public:
     static constexpr Token::t_type BRIGHTNESS_T = Lexer::LAST_T + 37;
     static constexpr Token::t_type CONTRAST_T = Lexer::LAST_T + 38;
     static constexpr Token::t_type COLOR_T = Lexer::LAST_T + 39;
-    static constexpr Token::t_type SECTION_T = Lexer::LAST_T + 40;
-    static constexpr Token::t_type DIMENSIONS_T = Lexer::LAST_T + 41;
-    static constexpr Token::t_type PROG_T = Lexer::LAST_T + 42;
+    static constexpr Token::t_type UNMINUS_T = Lexer::LAST_T + 40;
+    static constexpr Token::t_type SECTION_T = Lexer::LAST_T + 41;
+    static constexpr Token::t_type DIMENSIONS_T = Lexer::LAST_T + 42;
+    static constexpr Token::t_type PROG_T = Lexer::LAST_T + 43;
     static constexpr Token::t_type LAST_T = PROG_T;
     //[[[end]]]
 
@@ -80,6 +81,8 @@ public:
     Token next_token();
     std::string token_name(Token::t_type type);
     static std::string get_token_name(Token::t_type type);
+
+    static bool channel_token(Token::t_type type);
 
 protected:
     bool is_letter();

@@ -2,12 +2,15 @@
 #define __TYPE_VISITOR_H__
 
 #include <iostream>
+#include <forward_list>
 #include <map>
-#include "ASTVisitor.h"
+#include "AST/ASTVisitor.h"
 
 class TypeVisitor : public ASTVisitor
 {
 public:
+    TypeVisitor();
+
     void visit(AssignNode& node);
     void visit(BinOpNode& node);
     void visit(CropNode& node);
@@ -25,9 +28,10 @@ public:
     void visit(ScalarNode& node);
     void visit(SectionNode& node);
     void visit(UnOpNode& node);
+
 private:
-    std::map<std::string, FullType> sym_table;
-    FullType op_type(Token op, FullType lhs, FullType rhs);
+    std::forward_list<std::map<std::string, FullType>> sym_table;
+    FullType binop_type(Token op, FullType lhs, FullType rhs);
 };
 
 #endif

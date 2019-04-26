@@ -61,6 +61,7 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::BRIGHTNESS_T, "brightness"},
         {ProgramLexer::CONTRAST_T, "contrast"},
         {ProgramLexer::COLOR_T, "color"},
+        {ProgramLexer::UNMINUS_T, "unminus"},
         {ProgramLexer::SECTION_T, "section"},
         {ProgramLexer::DIMENSIONS_T, "dimensions"},
         {ProgramLexer::PROG_T, "program"},
@@ -138,6 +139,13 @@ bool ProgramLexer::is_space()
 {
     return (curr_char == ' '
         or curr_char == '\t');
+}
+
+bool ProgramLexer::channel_token(Token::t_type type)
+{
+    return (type == ProgramLexer::R_T
+        or type == ProgramLexer::G_T
+        or type == ProgramLexer::B_T);
 }
 
 Token ProgramLexer::id_or_keyword()

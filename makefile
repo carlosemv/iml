@@ -21,10 +21,11 @@ EXEC = compiler
 
 _OBJ = Token.o Lexer.o ProgramLexer.o Parser.o ProgramParser.o FullType.o \
 	AST/IdNode.o AST/ScalarNode.o AST/BinOpNode.o AST/UnOpNode.o \
-	AST/PrintNode.o AST/ExportNode.o AST/SectionNode.o AST/ForNode.o \
-	AST/DimensionsNode.o AST/AssignNode.o AST/ProgramNode.o \
+	AST/PrintNode.o AST/ImportNode.o AST/ExportNode.o AST/SectionNode.o \
+	AST/ForNode.o AST/DimensionsNode.o AST/AssignNode.o AST/ProgramNode.o \
 	AST/CommandNode.o AST/ExprNode.o AST/FlipNode.o AST/ResizeNode.o \
-	AST/RotateNode.o AST/CropNode.o AST/ModifyNode.o AST/ASTVisitor.o main.o
+	AST/RotateNode.o AST/CropNode.o AST/ModifyNode.o AST/ASTVisitor.o \
+	PrintVisitor.o TypeVisitor.o main.o
 OBJ = $(patsubst %,$(BINDIR)%,$(_OBJ))
 
 ### executable target
@@ -46,3 +47,4 @@ $(BINDIR)%.o: $(SRCDIR)%.cpp
 clean: bin
 	$(DEL) ./$(EXEC)
 	$(DEL) $(BINDIR)*.o
+	$(DEL) $(BINDIR)AST/*.o

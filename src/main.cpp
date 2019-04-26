@@ -3,11 +3,13 @@
 #include <fstream>
 #include <optional>
 
-#include "PrintVisitor.h"
 #include "ProgramLexer.h"
+#include "PrintVisitor.h"
 #include "CompilerExceptions.h"
 #include "ProgramParser.h"
 #include "AST/ProgramNode.h"
+#include "TypeVisitor.h"
+// #include "PythonVisitor.h"
 
 std::string read_file(std::string filename)
 {
@@ -34,33 +36,35 @@ std::optional<ProgramNode> parse(std::string input)
         std::cerr << "[Compiler Exception] ";
         std::cerr << e.what() << std::endl;
     }
-    return std::nullopt;
+    return std::nullopt;    
 }
 
-// bool generate_py(ProgramNode& root, std::string out_file)
-// {
-//     TypeVisitor tv;
-//     PythonVisitor pv;
+bool generate_py(ProgramNode& root, std::string out_file)
+{
+    PrintVisitor print_vis;
+    TypeVisitor tv;
+    // PythonVisitor pv;
 
-//     try {
-//         tv.visit(root);
-//         pv.visit(root);
-//         std::cout << "Successfully compiled\n";
-//         std::ofstream out(out_file, std::ios::out);
-//         out << pv.output.str();
-//         std::cout << "Output written to " << out_file
-//             << std::endl;
-//         return true;
-//     } catch (SemanticException& e) {
-//         std::cerr << "[Semantic Error] ";
-//         std::cerr << e.what() << std::endl;
-//     } catch (CompilerException& e) {
-//         std::cerr << "[Compiler Exception] ";
-//         std::cerr << e.what() << std::endl;
-//     }
+    try {
+        print_vis.visit(root);
+        tv.visit(root);
+        // pv.visit(root);
+        std::cout << "Successfully compiled\n";
+        // std::ofstream out(out_file, std::ios::out);
+        // out << pv.output.str();
+        // std::cout << "Output written to " << out_file
+            // << std::endl;
+        return true;
+    } catch (SemanticException& e) {
+        std::cerr << "[Semantic Error] ";
+        std::cerr << e.what() << std::endl;
+    } catch (CompilerException& e) {
+        std::cerr << "[Compiler Exception] ";
+        std::cerr << e.what() << std::endl;
+    }
 
-//     return false;
-// }
+    return false;
+}
 
 int main(int argc, char* argv[])
 {
@@ -70,20 +74,20 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    std::string input = read_file(argv[1]);
-    std::string output = argv[2];
-
     // ProgramLexer pl(input);
     // Token t;
     // do {
     //     t = pl.next_token();
     //     std::cout << "<" << pl.token_name(t.type) << "> ";
     // } while (t.type != ProgramLexer::EOF_T);
-    auto root = parse(input);
-    if (root) {
-        PrintVisitor pv;
-        pv.visit(root.value());
+    std::string input = read_file(argv[1]);
+    std::string output = argv[2];
+
+    auto prog_root = parse(input);
+    if (prog_root) {
+        if (generate_py(prog_root.value(), output))
+            return EXIT_SUCCESS;
     }
 
-    return EXIT_SUCCESS;
+    return EXIT_FAILURE;
 }

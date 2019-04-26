@@ -4,7 +4,7 @@
 \newcommand{\literal}[1]{\text{\texttt{`#1'}}}
 \newcommand{\tsp}{\text{ }}
 
-\title{Implementação da Linguagem List}
+\title{Image Manipulation Language}
 \author{Carlos Vieira\thanks{vieiramecarlos@gmail.com}}
 
 \begin{document}
@@ -12,23 +12,50 @@
 \maketitle
 
 \section{Introdução}
-O objetivo desse documento é descrever o primeiro trabalho desenvolvido para a disciplina de Linguagens de Domínio Específico (MPES0019 - Tópicos Avançados em Engenharia de Software I), ministrada pelo Prof. Dr. Sérgio Queiroz de Medeiros, dentro do Programa de Pós-graduação em Engenharia de Software (PPgSW) da Universidade Federal do Rio Grande do Norte (UFRN).
+O objetivo desse documento é descrever o trabalho final desenvolvido para a disciplina de Linguagens de Domínio Específico (MPES0019 - Tópicos Avançados em Engenharia de Software I), ministrada pelo Prof. Dr. Sérgio Queiroz de Medeiros, dentro do Programa de Pós-graduação em Engenharia de Software (PPgSW) da Universidade Federal do Rio Grande do Norte (UFRN).
 
-O trabalho tinha como objetivo geral implementar a linguagem \textit{List}, definida nas sessões \ref{sec:sintaxe} e \ref{sec:semantica}. Mais especificamente, isso envolveu o desenvolvimento de um parser descendente recursivo, discutido na sessão \ref{sec:parser}; e geração de código em outra linguagem (no caso dessa implementação, Python), com o auxílio de \textit{Abstract Syntax Trees} (AST), discutida na sessão \ref{sec:geracao}. Na sessão \ref{sec:resultados} oferecemos alguns exemplos, e discutimos os resultados assim como possíveis melhorias futuras para a implementação. No apêndice \ref{sec:uso}, oferecemos instruções simples de como utilizar essa implementação.
+O trabalho tinha como objetivo geral projetar e implementar uma linguagem de domínio específico. A proposta especifíca desse projeto se deve a dois fatores: primeiramente, muitas pessoas que trabalham com edição e manipulação de imagens não tem conhecimento de linguagens de programação de propósito geral que possam usar para esse propósito. Além disso, a alternativa de usar linguagens de scripting em programas de edição de imagen (e.g. AppleScript ou VBScript com photoshop), além de necessitar de compreensão de características da linguagem irrelevantes para o processo de ediçãi, é extremamente acoplada ao programa em uso.
+
+Por outro lado, uma linguagem de domínio específico (DSL - \emph{Domain Specific Language}) voltada a esse propósito, além de poder ser mais simples de aprender, poderia ser mais clara e legível, e independente de qual ferramente de edição é usada na sua implementação. Por isso, propus o desenvolvimento da \emph{Image Manipulation Language} (IML), com essas vantagens em mente. O projeto dessa linguagem pode ser melhor compreendido através da sua sintaxe e da sua semântica, descritas nas sessões \ref{sec:sintaxe} e \ref{sec:semantica}, respectivamente.
+
+Além do projeto da linguagem, foi necessário implementá-la. Isso envolveu, mais especificamente, o desenvolvimento de um parser descendente recursivo, discutido na sessão \ref{sec:parser}; e geração de código em outra linguagem (no caso dessa implementação, Python), com o auxílio de \textit{Abstract Syntax Trees} (AST), discutida na sessão \ref{sec:geracao}. Na sessão \ref{sec:resultados} oferecemos alguns exemplos, e discutimos os resultados assim como possíveis melhorias futuras para a implementação. No apêndice \ref{sec:uso}, oferecemos instruções simples de como utilizar essa implementação.
 
 \section{Sintaxe de List}
 \label{sec:sintaxe}
-Descrevemos a sintaxe de List de acordo com a especificação do projeto, através da gramática abaixo. Note que a única alteração feita por esse implementação foi passar a aceitar o programa vazio, sem nenhum comando.
+A sintaxe da IML é descrita abaixo. O único elemento não presente nessa, por claridade, são comentários: uma linha, quando iniciada pelo caractere `\#', é ignorada.
 \begin{align*}
-programa &\rightarrow comando*\\
-comando &\rightarrow ID \tsp \literal{=} \tsp expr \mid \literal{print} \tsp expr\\
-expr &\rightarrow exprPonto \tsp (\literal{+} \tsp exprPonto)*\\
-exprPonto &\rightarrow exprPrimaria \tsp (\literal{.} \tsp exprPrimaria)*\\
-exprPrimaria &\rightarrow ID \mid lista \mid INT \mid \literal{false} \mid \literal{true}\\
-lista &\rightarrow \literal{[} \tsp elementos? \tsp \literal{]}\\
-elementos &\rightarrow expr \tsp (\literal{,} \tsp expr)* \\
-ID &\rightarrow [a-zA-Z]+\\
-INT &\rightarrow [0-9]+
+program &\rightarrow command*\\
+command &\rightarrow stmt \mid img-expr\\
+stmt &\rightarrow assignment \mid export \mid print \mid for-each\\
+assignment &\rightarrow id \tsp \literal{=} \tsp expression\\
+export &\rightarrow \literal{save} \tsp expression \tsp \literal{as} \tsp expression\\
+print &\rightarrow \literal{print} \tsp expression\\
+for-each &\rightarrow \literal{for} \tsp \literal{all}? \tsp id \tsp \literal{in} \tsp expression \literal{\{} \tsp command* \tsp \literal{\}}\\
+expression &\rightarrow arith-expr\\
+import-expr &\rightarrow \literal{image in} \tsp expression\\
+img-expr &\rightarrow geom-expr \mid color-expr\\
+geom-expr &\rightarrow rotate-expr \mid resize-expr \mid crop-expr \mid flip-expr\\
+color-expr &\rightarrow modify-expr\\
+rotate-expr &\rightarrow \literal{rotate} \tsp expression \tsp \literal{by} \tsp expression\\
+flip-expr &\rightarrow \literal{flip} \tsp expression \tsp (\literal{vertically} \mid \literal{horizontally})\\
+resize-expr &\rightarrow \literal{resize} \tsp expression \tsp (\literal{to} \mid \literal{by}) \tsp expression\\
+crop-expr &\rightarrow \literal{crop} \tsp expression \tsp \literal{from} \tsp expression\\
+modify-expr &\rightarrow \literal{modify} \tsp expression enhancement \tsp \literal{by} \tsp expression\\
+enhancement &\rightarrow \literal{sharpness} \mid \literal{brightness} \mid \literal{contrast} \mid \literal{color}\\
+shape-expr &\rightarrow dimensions \mid section\\
+dimensions &\rightarrow \literal{(} expression \literal{,} expression \literal{)}\\
+section &\rightarrow \literal{(} expression \literal{,} expression \literal{,} expression \literal{,} expression \literal{)}\\
+arith-expr &\rightarrow term \mid arith-expr \tsp (\literal{+} \mid \literal{-}) \tsp term\\
+term &\rightarrow factor \mid term \tsp (\literal{*} \mid \literal{/}) \tsp factor\\
+factor &\rightarrow atom \mid \literal{-} \tsp factor\\
+atom &\rightarrow primary \mid primary \tsp \literal{(} \tsp channel \tsp \literal{)}\\
+channel &\rightarrow \literal{R} \mid \literal{G} \mid \literal{B}\\
+primary &\rightarrow id \mid \literal{(} \tsp expression \tsp \literal{)} \mid scalar \mid import-expr \mid img-expr \mid shape-expr\\
+scalar &\rightarrow float \mid integer \mid path\\
+id &\rightarrow [a-zA-Z]+\\
+integer &\rightarrow [0-9]+\\
+float &\rightarrow integer (\literal{.} integer)?\\
+path &\rightarrow \literal{"} [\textasciicircum{}\literal{"}]* \literal{"}
 \end{align*}
 
 
@@ -73,7 +100,7 @@ Note que certas funções só são chamadas por outras funções no sentido que 
 \label{sec:resultados}
 Abaixo, podemos ver um exemplo de programa válido na linguagem List, e o programa equivalente gerado por essa implementação em Python (comentários adicionados posteriormente, e funções padrões omitidas). Outros exemplos estão disponíveis no diretório \texttt{examples/}, dentro do diretório raíz do projeto. Considerando isso, e o que foi apresentado até então nesse documento, todos os requisitos do projeto foram atendidos, além de verificação pelo compilador de erros de semântica estática. Um ponto em que a implementação poderia melhorar seria em indicar, no caso de operações indefinidas envolvendo um elemento de uma lista, qual elemento (por posição, ou posições no caso de listas aninhadas) causou o erro.
 
-\begin{lstlisting}[language=List]
+\begin{lstlisting}[language=IML]
 a = [0, 1, 2]
 print a + 2
 print 3 . a

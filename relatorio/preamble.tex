@@ -28,9 +28,9 @@
 %\newcommand{\sectionbreak}{\clearpage} % titlesec
 
 \newcommand{\plcommentstyle}{\color{gray}\ttfamily} % pl comment style
-\newcommand{\id}[1]{\texttt{#1}} % List identifier
-\newcommand{\key}[1]{\texttt{#1}} % List keyword
-\newcommand{\type}[1]{\texttt{#1}} % List type
+\newcommand{\id}[1]{\texttt{#1}} % IML identifier
+\newcommand{\key}[1]{\texttt{#1}} % IML keyword
+\newcommand{\type}[1]{\texttt{#1}} % IML type
 
 \NewDocumentCommand{\premise}{o}{%
   \tau, \sigma, \textit{s},
@@ -47,12 +47,12 @@
   \mathrel{\tikz[baseline] \draw [{Stealth[length=2pt,width=5pt]}-, decorate, decoration={snake,amplitude=0.6mm,segment length=1mm, pre length=1mm}, line width=0.5pt] (0,0) -- ++(0,8pt);}
 }
 
-\lstdefinelanguage{List}{
+\lstdefinelanguage{IML}{
 	sensitive = true,
-	morekeywords={print, true, false},
+	morekeywords={print, rotate, resize, to, by, crop, from, for, all, in, image, save, as, flip, horizontally, vertically, R, G, B, modify, sharpness, brightness, contrast, color},
 	keywordstyle=\color{purple},
 	morecomment=[l]{\~},
-	commentstyle=\Listcommentstyle,
+	commentstyle=\IMLcommentstyle,
 	upquote=true,
 	morestring=[b]",
 	morestring=[b]',

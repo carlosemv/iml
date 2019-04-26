@@ -1,0 +1,85 @@
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=4cm]{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{calc} % AgeofEuler
+\usepackage{textcomp} % lst upquote
+\usepackage{titlesec} % paragraph section
+\usepackage{indentfirst}
+% \usepackage{algorithm}
+% \usepackage{algorithmic}
+% \usepackage{tabu}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing, arrows.meta}
+\usepackage{xparse}
+\usepackage{longtable}
+% \usepackage{semantic}
+% \usepackage{backnaur}
+\usepackage{textcomp} % \textquotesingle
+\usepackage{bm} % bold math
+\usepackage{amssymb} % To provide the \varnothing symbol
+\usepackage{amsmath}
+% \usepackage{ebproof}
+% \usepackage{ stmaryrd } %lightning symbol
+\newcommand{\nothing}{\varnothing} % different from \emptyset
+%\newcommand{\sectionbreak}{\clearpage} % titlesec
+
+\newcommand{\plcommentstyle}{\color{gray}\ttfamily} % pl comment style
+\newcommand{\id}[1]{\texttt{#1}} % List identifier
+\newcommand{\key}[1]{\texttt{#1}} % List keyword
+\newcommand{\type}[1]{\texttt{#1}} % List type
+
+\NewDocumentCommand{\premise}{o}{%
+  \tau, \sigma, \textit{s},
+  \IfNoValueTF{#1}
+    {\phi}%else
+    {#1}
+    \vdash
+}
+%\newcommand{\premise}[1][0]{\tau, \sigma, \textit{s}, #1 \vdash}
+\newcommand{\spa}{\enspace}
+\newcommand{\plaintilde}{{\raise.17ex\hbox{$\scriptstyle\sim$}}}
+
+\NewDocumentCommand\downsquigarrow{O{10.0ex}}{%
+  \mathrel{\tikz[baseline] \draw [{Stealth[length=2pt,width=5pt]}-, decorate, decoration={snake,amplitude=0.6mm,segment length=1mm, pre length=1mm}, line width=0.5pt] (0,0) -- ++(0,8pt);}
+}
+
+\lstdefinelanguage{List}{
+	sensitive = true,
+	morekeywords={print, true, false},
+	keywordstyle=\color{purple},
+	morecomment=[l]{\~},
+	commentstyle=\Listcommentstyle,
+	upquote=true,
+	morestring=[b]",
+	morestring=[b]',
+	stringstyle=\color{red}\ttfamily,
+	numbers=left,
+	numberstyle=\scriptsize,
+	stepnumber=1,
+	tabsize=4,
+	showstringspaces=false
+}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\def\subsectionautorefname{section}
+\def\subsubsectionautorefname{section}
+\def\paragraphautorefname{section}
+
+% .../backnaur/backnaur.sty
+% \newcommand{\bnfts}[1]{\textnormal{\bnf@tsfont{#1}}}
+% \textnormal -> \textbf
+
+\newenvironment{bnfsplit}[1][0.5\textwidth]
+{\minipage[t]{#1}$}
+{$\endminipage}

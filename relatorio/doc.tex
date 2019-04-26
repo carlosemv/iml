@@ -1,0 +1,105 @@
+\documentclass{article}
+
+\input{preamble.tex}
+\newcommand{\literal}[1]{\text{\texttt{`#1'}}}
+\newcommand{\tsp}{\text{ }}
+
+\title{Implementação da Linguagem List}
+\author{Carlos Vieira\thanks{vieiramecarlos@gmail.com}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+O objetivo desse documento é descrever o primeiro trabalho desenvolvido para a disciplina de Linguagens de Domínio Específico (MPES0019 - Tópicos Avançados em Engenharia de Software I), ministrada pelo Prof. Dr. Sérgio Queiroz de Medeiros, dentro do Programa de Pós-graduação em Engenharia de Software (PPgSW) da Universidade Federal do Rio Grande do Norte (UFRN).
+
+O trabalho tinha como objetivo geral implementar a linguagem \textit{List}, definida nas sessões \ref{sec:sintaxe} e \ref{sec:semantica}. Mais especificamente, isso envolveu o desenvolvimento de um parser descendente recursivo, discutido na sessão \ref{sec:parser}; e geração de código em outra linguagem (no caso dessa implementação, Python), com o auxílio de \textit{Abstract Syntax Trees} (AST), discutida na sessão \ref{sec:geracao}. Na sessão \ref{sec:resultados} oferecemos alguns exemplos, e discutimos os resultados assim como possíveis melhorias futuras para a implementação. No apêndice \ref{sec:uso}, oferecemos instruções simples de como utilizar essa implementação.
+
+\section{Sintaxe de List}
+\label{sec:sintaxe}
+Descrevemos a sintaxe de List de acordo com a especificação do projeto, através da gramática abaixo. Note que a única alteração feita por esse implementação foi passar a aceitar o programa vazio, sem nenhum comando.
+\begin{align*}
+programa &\rightarrow comando*\\
+comando &\rightarrow ID \tsp \literal{=} \tsp expr \mid \literal{print} \tsp expr\\
+expr &\rightarrow exprPonto \tsp (\literal{+} \tsp exprPonto)*\\
+exprPonto &\rightarrow exprPrimaria \tsp (\literal{.} \tsp exprPrimaria)*\\
+exprPrimaria &\rightarrow ID \mid lista \mid INT \mid \literal{false} \mid \literal{true}\\
+lista &\rightarrow \literal{[} \tsp elementos? \tsp \literal{]}\\
+elementos &\rightarrow expr \tsp (\literal{,} \tsp expr)* \\
+ID &\rightarrow [a-zA-Z]+\\
+INT &\rightarrow [0-9]+
+\end{align*}
+
+
+\section{Semântica de List}
+\label{sec:semantica}
+Quanto a semântica de um programa na linguagem List, enquanto a maioria dos pontos foram definidos previamente na descrição do projeto, muitos foram deixados como dependentes da implementação. De qualquer forma, descrevemos resumidamente suas características semânticas abaixo.
+
+Primeiramente, um programa na linguagem List é composto de zero ou mais comandos sequenciais. Um comando pode ser de impressão, ``\texttt{print} \textit{expr}'', que imprime o valor de \textit{expr} na saída padrão; ou de atribuição, ``\textit{ID} \texttt{=} \textit{expr}'', que atribui o valor de \textit{expr} à variável com nome \textit{ID}, que pode ou não já ter sido atribuido outro valor.
+
+Uma expressão, assim como uma variável já atribuída, possui um de três tipos: inteiro (valores não-negativos), booleano (\texttt{true} ou \texttt{false}), ou uma lista, cujos elementos por sua vez podem ter qualquer um desses três tipos. Há duas operações em List que podem compor expressões mais básicas em expressões mais complexas, \texttt{.} e \texttt{+}. Porém, essas operações funcionam de formas diferentes dependendo dos tipos de seus operandos, e não são definidas para todas as possíveis combinações de tipos.
+
+A operação \texttt{+}, quando aplicada a dois inteiros, representa sua soma; e entre dois booleanos, sua disjunção (operador `\textit{or}'). Já quando aplicada a duas listas $l_1$ e $l_2$, o resultado será uma lista do mesmo tamanho de $l_1$, onde cada elemento na posição $i$ é o resultado de aplicar a operação \texttt{+} entre os elementos de $l_1$ e $l_2$ nessa posição. Caso $l_2$ seja menor que $l_1$, para cada $i$ maior que o tamanho de $l_2$, o elemento na posição $i$ da lista resultante terá o valor do elemento nessa mesma posição em $l_1$. Caso $l_2$ seja maior que $l_1$, os valores de $l_2$ em posições além do tamanho de $l_1$ são ignorados, já que a operação só é realizada para cada posição em $l_1$. Quando aplicado entre um booleano e uma lista, ou um inteiro e uma lista, o resultado será uma nova lista, onde cada elemento é o resultado de aplicar a operação \texttt{+} entre esse valor e cada elemento da lista original.
+
+A operação \texttt{.}, quando aplicada entre inteiros, representa seu produto; e entre booleanos, sua conjunção (operador `\textit{and}'). Já quando aplicada a duas lista, o resultado é a concatenação dessas. E, similarmente a \texttt{+}, se aplicada entre um booleano e uma lista ou entre um inteiro e uma lista, o resultado será uma nova lista, onde cada elemento é o resultado de aplicar a operação \texttt{.} entre esse valor e cada elemento da lista original. Note que ambas as operações são indefinidas no caso de um operando ser um booleano e outro um inteiro, o que leva a um erro de semântica estática em tempo de compilação nessa implementação. Além disso, ambas são operações comutativas, exceto quando ambos operandos são listas. Variáveis com um tipo apropriado podem ser usadas em lugar de uma expressão através de seu identificador (\texttt{ID}), contanto que já tenham sido atribuidas um valor (caso contrário, um erro de semântica estática será emitido durante a compilação). 
+
+
+\section{Parser}
+\label{sec:parser}
+O parser para essa linguagem (assim como o restante do compilador), foi escrito em C++, sem auxílio de ferramentas para geração de parsers. Antes de realizado o parsing em si, a entrada é agrupada em tokens, ignorando espaços em branco, que carregam informações do conteúdo (ou texto), tipo, e localização (linha e coluna). Esses tokens são então passados para o parser em si, que é um parser descendente recursivo (\textit{top-down}) LL(1). 
+
+O parser não apenas verifica a corretude sintática do programa, mas também constrói uma árvore sintática abstrata (AST - \textit{Abstract Syntax Tree}) que facilitará o restante do processo de compilação, em especial a geração de código. Erros sintáticos são reportados na saída padrão, com informações de posição (linha, coluna) e forma esperada, e interrompem o processo de parsing.
+
+\section{Geração de Código}
+\label{sec:geracao}
+Após a análise léxica e a contrução da AST pelo parser, passamos a geração de código. Essa implementação gera código equivalente em Python a partir de um programa válido na linguagem List. Esse processo envolve duas travessias pela AST. Na primeira, são determinados os tipos de expressões compostas e de variáveis, assim como verificados problemas de semântica estática, como operações indefinidas ou uso de variáveis não inicializadas. Esses problemas, se encontrados, são assim como no parser reportados na saída padrão, e interrompem o processo de geração de código.
+
+Na segunda, passamos a geração de código em si. Para isso, são necessárias algumas funções auxiliares (em Python) definidas no início de cada programa gerado. São essas funções que permitem algumas das operações ``recursivas'' de List, como \texttt{+} entre listas, ou \textit{.} entre um inteiro e uma lista que contém listas, por exemplo. Uma vez definidas essa funções (brevemente descritas abaixo), o código equivalente é gerado para cada nó da árvore e acumulado, e então escrito para um arquivo de saída pré-definido (ver apêndice \ref{sec:uso}).
+
+\begin{itemize}
+\item \texttt{\_sum}: aplicar \texttt{+} a dois elementos de quaisquer tipos, só é chamada por outras funções (e.g. \texttt{\_list\_sum});
+\item \texttt{\_list\_sum}: aplicar \texttt{+} a duas listas;
+\item \texttt{\_scalar\_list\_sum}: aplicar \texttt{+} entre um booleano e uma lista, ou um inteiro e uma lista;
+\item \texttt{\_scalar\_sum}: aplicar \texttt{+} entre dois booleanos ou entre dois inteiros, só é chamada por outras funções (e.g. \texttt{\_sum});
+\item \texttt{\_dot}: aplicar \texttt{.} a dois elementos de quaisquer tipos, só é chamada por outras funções (e.g. \texttt{\_scalar\_list\_dot});
+\item \texttt{\_scalar\_list\_dot}: aplicar \texttt{.} entre um booleano e uma lista, ou um inteiro e uma lista;
+\item \texttt{\_scalar\_dot}: aplicar \texttt{.} entre dois booleanos ou entre dois inteiros, só é chamada por outras funções (e.g. \texttt{\_dot});
+\end{itemize}
+
+Note que certas funções só são chamadas por outras funções no sentido que não são chamadas diretamente do ``\textit{main}'', já que o compilador pode chamar uma função mais específica diretamente nesses casos. Por exemplo, para \texttt{.} entre dois inteiros \texttt{a} e \texttt{b}, \texttt{\_dot(a, b)}, assim como \texttt{\_scalar\_dot(a, b)}, produziriam o resultado desejado, mas se não há listas envolvidas podemos simplesmente traduzir essa operação como \texttt{a * b} em Python. Além disso, toda função padrão se inicia com um \textit{underscore} (\_), para evitar conflitos com variáveis definidas pelo usuário de List.
+
+\section{Resultados}
+\label{sec:resultados}
+Abaixo, podemos ver um exemplo de programa válido na linguagem List, e o programa equivalente gerado por essa implementação em Python (comentários adicionados posteriormente, e funções padrões omitidas). Outros exemplos estão disponíveis no diretório \texttt{examples/}, dentro do diretório raíz do projeto. Considerando isso, e o que foi apresentado até então nesse documento, todos os requisitos do projeto foram atendidos, além de verificação pelo compilador de erros de semântica estática. Um ponto em que a implementação poderia melhorar seria em indicar, no caso de operações indefinidas envolvendo um elemento de uma lista, qual elemento (por posição, ou posições no caso de listas aninhadas) causou o erro.
+
+\begin{lstlisting}[language=List]
+a = [0, 1, 2]
+print a + 2
+print 3 . a
+print a . [3]
+
+b = [4, [3, 2], [], 5]
+print b + a
+print [] . []
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, numbers=left, numberstyle=\scriptsize]
+# after standard functions
+
+a = [0, 1, 2]
+print(_scalar_list_sum(2, a))	# gives [2, 3, 4]
+print(_scalar_list_dot(3, a))	# gives [0, 3, 6]
+print((a + [3]))		# gives [0, 1, 2, 3]
+b = [4, [3, 2], [], 5]
+print(_list_sum(b, a))		# gives [4, [4, 3], [], 5]
+print(([] + []))		# gives []
+\end{lstlisting}
+
+\appendix
+\section{Uso}
+\label{sec:uso}
+Para compilação do projeto, é necessário um compilador compatível com o padrão c++-17, e para execução dos códigos produzidos, um interpretador Python com versão igual ou superior a 3.6. A compilação do projeto é feita através do comando \texttt{make}, no diretório raíz do projeto, o que produzirá um executável \texttt{bin/compiler}.
+
+Para executá-lo, então, faça \texttt{./bin/compiler <in> <out>}, onde \texttt{<in>} é o arquivo de entrada, um programa na linguagem List, e \texttt{<out>} onde será escrito o código resultante em Python, no caso de compilação bem-sucedida. No caso de erros, estes são reportados na saída padrão, e nenhum código será gerado.
+\end{document}

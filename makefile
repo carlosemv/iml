@@ -29,16 +29,12 @@ _OBJ = Token.o Lexer.o ProgramLexer.o Parser.o ProgramParser.o FullType.o \
 OBJ = $(patsubst %,$(BINDIR)%,$(_OBJ))
 
 ### executable target
-main: bin gen $(OBJ)
+main: bin $(OBJ)
 	$(CXX) $(OBJ) -o $(BINDIR)$(EXEC) $(CXXFLAGS) $(LIBS)
 
 bin:
 	mkdir -p ./bin/
 	mkdir -p ./bin/AST/
-
-gen:
-	cog -r include/ProgramLexer.h
-	cog -r src/ProgramLexer.cpp
 
 $(BINDIR)%.o: $(SRCDIR)%.cpp
 	$(CXX) -c $< -o $@ $(CXXFLAGS) $(DECLRDIR)

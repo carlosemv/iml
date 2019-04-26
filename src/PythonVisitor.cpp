@@ -18,7 +18,7 @@ void PythonVisitor::visit(DimensionsNode& node)
 {
     output << "(";
     node.width.get()->visit(*this);
-    output << ",";
+    output << ", ";
     node.height.get()->visit(*this);
     output << ")";
 }

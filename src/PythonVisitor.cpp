@@ -2,6 +2,103 @@
 #include "ProgramLexer.h"
 #include "CompilerExceptions.h"
 
+void TypeVisitor::visit(CropNode& node)
+{
+    node.section.get()->visit(*this);
+    node.image.get()->visit(*this);
+}
+
+void TypeVisitor::visit(DimensionsNode& node)
+{
+    node.width.get()->visit(*this);
+    node.height.get()->visit(*this);
+}
+
+void TypeVisitor::visit(ExportNode& node)
+{
+    node.image.get()->visit(*this);
+    node.path.get()->visit(*this);
+}
+
+void TypeVisitor::visit(FlipNode& node)
+{
+    node.image.get()->visit(*this);
+}
+
+void TypeVisitor::visit(ForNode& node)
+{
+    sym_table.emplace_front();
+
+    node.iterator.get()->visit(*this);
+    node.path.get()->visit(*this);
+
+    for (auto& cmd : node.cmds) {
+        cmd.get()->visit(*this);
+    }
+
+    sym_table.pop_front();
+}
+
+void TypeVisitor::visit(ImportNode& node)
+{
+    node.path.get()->visit(*this);
+    auto path_type = node.path.get()->ftype;
+    if (path_type.type != ExprType::Path)
+        throw SemanticException("Expression has invalid type "
+            + path_type.to_string() + "; expected a Path");
+
+    node.ftype.type = ExprType::Image;
+}
+
+void TypeVisitor::visit(ModifyNode& node)
+{
+    node.image.get()->visit(*this);
+    node.factor.get()->visit(*this);
+}
+
+void TypeVisitor::visit(ResizeNode& node)
+{
+    node.image.get()->visit(*this);
+    node.resize.get()->visit(*this);
+}
+
+void TypeVisitor::visit(RotateNode& node)
+{
+    node.image.get()->visit(*this);
+    node.rotation.get()->visit(*this);
+}
+
+void TypeVisitor::visit(SectionNode& node)
+{
+    node.left.get()->visit(*this);
+    node.upper.get()->visit(*this);
+    node.right.get()->visit(*this);
+    node.lower.get()->visit(*this);
+}
+
+void TypeVisitor::visit(UnOpNode& node)
+{
+    if (node.token) {
+        auto op = node.token.value();
+        if (op.type == ProgramLexer::UNMINUS_T) {
+            output << op.text;
+            node.expr.get()->visit(*this);
+        } else if (ProgramLexer::channel_token(op.type)) {
+            node.expr.get()->visit(*this);
+            int channel = 0;
+            if (op.text == "G") channel = 1;
+            else if (op.text == "B") channel = 2;
+            output << "[" << channel << "]";
+        } else {
+            throw CompilerException("Unary operation at "
+                + op.pos_string() + " has invalid token type");
+        }
+    } else {
+        throw CompilerException("Unary operation"\
+            " has no defining token\n");
+    }
+}
+
 void PythonVisitor::visit(AssignNode& node)
 {
     node.id.get()->visit(*this);
@@ -11,9 +108,14 @@ void PythonVisitor::visit(AssignNode& node)
 
 void PythonVisitor::visit(PrintNode& node)
 {
-    output << "print(";
-    node.expr.get()->visit(*this);
-    output << ")";
+    if (node.expr.get()->ftype.type == ExprType::Image) {
+        node.expr.get()->visit(*this);
+        output << ".show()";
+    } else {
+        output << "print(";
+        node.expr.get()->visit(*this);
+        output << ")";
+    }
 }
 
 void PythonVisitor::visit(BinOpNode& node)
@@ -28,34 +130,8 @@ void PythonVisitor::visit(BinOpNode& node)
 
     switch (node.token.value().type) {
         case ProgramLexer::DOT_T:
-            if (node.lhs.get()->ftype.type == ExprType::List
-                and node.rhs.get()->ftype.type == ExprType::List) {
-                operation = "+";
-            } else if (node.rhs.get()->ftype.type == ExprType::List) {
-                func_call = "_scalar_list_dot";
-            } else if (node.lhs.get()->ftype.type == ExprType::List) {
-                func_call = "_scalar_list_dot";
-                invert = true;
-            } else if (node.lhs.get()->ftype.type == ExprType::Bool) {
-                operation = "and";
-            } else {
-                operation = "*";
-            }
             break;
         case ProgramLexer::PLUS_T:
-            if (node.lhs.get()->ftype.type == ExprType::List
-                and node.rhs.get()->ftype.type == ExprType::List) {
-                func_call = "_list_sum";
-            } else if (node.rhs.get()->ftype.type == ExprType::List) {
-                func_call = "_scalar_list_sum";
-            } else if (node.lhs.get()->ftype.type == ExprType::List) {
-                func_call = "_scalar_list_sum";
-                invert = true;
-            } else if (node.lhs.get()->ftype.type == ExprType::Bool) {
-                operation = "or";
-            } else {
-                operation = "+";
-            }
             break;
         default:
             throw CompilerException("Binary operation at "
@@ -102,72 +178,45 @@ void PythonVisitor::visit(ProgramNode& node)
     }
 }
 
-void PythonVisitor::visit(ListNode& node)
-{
-    output << "[";
-    auto expr = node.exprs.begin();
-    for (; expr != node.exprs.end(); ++expr) {
-        (*expr)->visit(*this);
-        if (expr+1 != node.exprs.end())
-            output << ", ";
-    }
-    output << "]";
-}
-
 void PythonVisitor::visit(ScalarNode& node)
 {
-    if (not node.token)
-        throw CompilerException("Scalar node has no token\n");
-
-    if (node.ftype.type == ExprType::Bool) {
-        if (node.token.value().text == "true")
-            output << "True";
-        else
-            output << "False";
+    if (node.token) {
+        if (node.ftype.type == ExprType::Path) {
+            std::cout << '"';
+            std::cout << node.token.value().text;
+            std::cout << '"';
+        } else {
+            std::cout << node.token.value().text;
+        }
     } else {
-        output << node.token.value().text;
+        throw CompilerException("Scalar node has no token\n");
     }
 }
 
 const char* PythonVisitor::prog_header = 
-    "def _sum(a1, a2):\n"
-    "    if isinstance(a1, list) and isinstance(a2, list):\n"
-    "        return _list_sum(a1, a2)\n"
-    "    elif isinstance(a1, list):\n"
-    "        return _scalar_list_sum(a2, a1)\n"
-    "    elif isinstance(a2, list):\n"
-    "        return _scalar_list_sum(a1, a2)\n"
-    "    else:\n"
-    "        return _scalar_sum(a1, a2)\n"
+    "from PIL import Image, ImageEnhance, ImageChops, ImageFile\n"
+    "ImageFile.LOAD_TRUNCATED_IMAGES = True\n"
     "\n"
-    "def _list_sum(l1, l2):\n"
-    "    return [_sum(_a, l2[_i]) if _i < len(l2) else _a\\\n"
-    "        for _i, _a in enumerate(l1)]\n"
+    "def _add(img1, img2):\n"
+    "   result = img1.copy()\n"
+    "   result.paste(img2)\n"
+    "   return result\n"
     "\n"
-    "def _scalar_list_sum(s, l):\n"
-    "    return [_sum(s, i) for i in l]\n"
+    "def _sub(img1, img2):\n"
+    "   return ImageChops.difference(img1, img2)\n"
     "\n"
-    "def _scalar_sum(s1, s2):\n"
-    "    if isinstance(s1, bool):\n"
-    "        return s1 or s2\n"
-    "    else:\n"
-    "        return s1 + s2\n"
+    "def _mult(img1, img2):\n"
+    "   return ImageChops.blend(img1, img2, 0.5)\n"
     "\n"
-    "def _dot(a1, a2):\n"
-    "    if isinstance(a2, list):\n"
-    "        return _scalar_list_dot(a1, a2)\n"
-    "    elif isinstance(a1, list):\n"
-    "        return _scalar_list_dot(a2, a1)\n"
-    "    else:\n"
-    "        return _scalar_dot(a1, a2)\n"
+    "def _div(img1, img2):\n"
+    "   return _mult(img1, _inv(img2))\n"
+    "   \n"
+    "def _inv(img):\n"
+    "    *rgb, a = img.split()\n"
+    "    img_rgb = Image.merge('RGB', rgb)\n"
+    "    img_inv = ImageChops.invert(img_rgb)\n"
+    "    img_inv.putalpha(a)\n"
     "\n"
-    "def _scalar_list_dot(s, l):\n"
-    "    return [_dot(s, i) for i in l]\n"
-    "\n"
-    "def _scalar_dot(s1, s2):\n"
-    "    if isinstance(s1, bool):\n"
-    "        return s1 or s2\n"
-    "    else:\n"
-    "        return s1 * s2\n"
+    "    return img_inv\n"
     "\n"
     "\n";

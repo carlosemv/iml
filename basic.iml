@@ -6,9 +6,9 @@ resize img to (100, 100)
 resize img by 0.5
 flip img vertically
 modify img contrast by 5
-for all img in "dir" {
-	for all img in "dir" {
-	    red = img(R) / 2
+for all i in "dir" {
+	for all i in "dir" {
+	    red = i(R) / 2
 		save red as "lala.png"
 	}
 }

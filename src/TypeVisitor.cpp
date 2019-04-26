@@ -8,33 +8,53 @@ TypeVisitor::TypeVisitor() : sym_table(1)
 void TypeVisitor::visit(CropNode& node)
 {
     node.section.get()->visit(*this);
+    check_section(node.section.get()->token,
+        node.section.get()->ftype);
+
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
 }
 
 void TypeVisitor::visit(DimensionsNode& node)
 {
     node.width.get()->visit(*this);
+    check_num(node.width.get()->token,
+        node.width.get()->ftype);
+
     node.height.get()->visit(*this);
+    check_num(node.height.get()->token,
+        node.height.get()->ftype);
 }
 
 void TypeVisitor::visit(ExportNode& node)
 {
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
+
     node.path.get()->visit(*this);
+    check_path(node.path.get()->token,
+        node.path.get()->ftype);
 }
 
 void TypeVisitor::visit(FlipNode& node)
 {
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
 }
 
 void TypeVisitor::visit(ForNode& node)
 {
     sym_table.emplace_front();
 
-    node.iterator.get()->visit(*this);
     node.path.get()->visit(*this);
+    check_path(node.path.get()->token,
+        node.path.get()->ftype);
 
+    auto iter = node.iterator.get()->token.value().text;
+    sym_table.front()[iter] = FullType(ExprType::Image);
     for (auto& cmd : node.cmds) {
         cmd.get()->visit(*this);
     }
@@ -45,10 +65,8 @@ void TypeVisitor::visit(ForNode& node)
 void TypeVisitor::visit(ImportNode& node)
 {
     node.path.get()->visit(*this);
-    auto path_type = node.path.get()->ftype;
-    if (path_type.type != ExprType::Path)
-        throw SemanticException("Expression has invalid type "
-            + path_type.to_string() + "; expected a Path");
+    check_path(node.path.get()->token,
+        node.path.get()->ftype);
 
     node.ftype.type = ExprType::Image;
 }
@@ -56,27 +74,58 @@ void TypeVisitor::visit(ImportNode& node)
 void TypeVisitor::visit(ModifyNode& node)
 {
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
+
     node.factor.get()->visit(*this);
+    check_num(node.factor.get()->token,
+        node.factor.get()->ftype);
 }
 
 void TypeVisitor::visit(ResizeNode& node)
 {
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
+
     node.resize.get()->visit(*this);
+    if (node.resize_type == ResizeType::Absolute) {
+        check_dimensions(node.resize.get()->token,
+            node.resize.get()->ftype);
+    } else {
+        check_num(node.resize.get()->token,
+            node.resize.get()->ftype);
+    }
 }
 
 void TypeVisitor::visit(RotateNode& node)
 {
     node.image.get()->visit(*this);
+    check_image(node.image.get()->token,
+        node.image.get()->ftype);
+
     node.rotation.get()->visit(*this);
+    check_num(node.rotation.get()->token,
+        node.rotation.get()->ftype);
 }
 
 void TypeVisitor::visit(SectionNode& node)
 {
     node.left.get()->visit(*this);
+    check_num(node.left.get()->token,
+        node.left.get()->ftype);
+
     node.upper.get()->visit(*this);
+    check_num(node.upper.get()->token,
+        node.upper.get()->ftype);
+
     node.right.get()->visit(*this);
+    check_num(node.right.get()->token,
+        node.right.get()->ftype);
+
     node.lower.get()->visit(*this);
+    check_num(node.lower.get()->token,
+        node.lower.get()->ftype);
 }
 
 void TypeVisitor::visit(UnOpNode& node)
@@ -262,3 +311,93 @@ void TypeVisitor::visit(ProgramNode& node)
 
 void TypeVisitor::visit(ScalarNode& node)
 {}
+
+void TypeVisitor::check_num(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (not type.is_num())
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected a numerical type");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
+
+void TypeVisitor::check_image(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Image)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected an image");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
+
+void TypeVisitor::check_path(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Path)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected a path");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
+
+void TypeVisitor::check_id(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Id)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected an identifier");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
+
+void TypeVisitor::check_dimensions(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Dimensions)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected dimensions");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
+
+void TypeVisitor::check_section(std::optional<Token> tok, FullType type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Section)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected a section");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}

@@ -58,6 +58,8 @@ void PrintVisitor::visit(ForNode& node)
         cmd.get()->visit(*this);
         std::cout << std::endl;
     }
+    for (auto i = 0; i < indent-1; ++i)
+        std::cout << "    ";
     std::cout << "}";
 
     indent--;

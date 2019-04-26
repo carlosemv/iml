@@ -3,6 +3,7 @@
 #include <fstream>
 #include <optional>
 
+#include "PrintVisitor.h"
 #include "ProgramLexer.h"
 #include "CompilerExceptions.h"
 #include "ProgramParser.h"
@@ -78,7 +79,11 @@ int main(int argc, char* argv[])
     //     t = pl.next_token();
     //     std::cout << "<" << pl.token_name(t.type) << "> ";
     // } while (t.type != ProgramLexer::EOF_T);
-    auto parsed = parse(input);
+    auto root = parse(input);
+    if (root) {
+        PrintVisitor pv;
+        pv.visit(root.value());
+    }
 
     return EXIT_SUCCESS;
 }

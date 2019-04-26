@@ -39,6 +39,7 @@ protected:
 
     std::unique_ptr<ExprNode> expression();
     std::unique_ptr<ExprNode> img_expr();
+    std::unique_ptr<ExprNode> import_expr();
     std::unique_ptr<ExprNode> shape_expr();
     std::unique_ptr<ExprNode> arith_expr();
     std::unique_ptr<ExprNode> term();

@@ -20,6 +20,7 @@ public:
     ModifyNode(Token _t, Modification _mod, expr_ptr _img, expr_ptr _factor);
     void visit(ASTVisitor& visitor);
 
+    std::string mod_name();
     Modification mod;
     expr_ptr image, factor;
 };

@@ -7,6 +7,7 @@
 #include "AST/DimensionsNode.h"
 #include "AST/SectionNode.h"
 #include "AST/IdNode.h"
+#include "AST/ImportNode.h"
 #include "AST/FlipNode.h"
 #include "AST/ResizeNode.h"
 #include "AST/CropNode.h"
@@ -86,6 +87,18 @@ std::unique_ptr<ExportNode> ProgramParser::export_stmt()
         export_tok, std::move(img), expression()));
 }
 
+std::unique_ptr<ExprNode> ProgramParser::import_expr()
+{
+    Token import_tok = curr_token;
+    if (not match(ProgramLexer::IMAGE_T))
+        throw_unexpected(ProgramLexer::IMAGE_T);
+    if (not match(ProgramLexer::IN_T))
+        throw_unexpected(ProgramLexer::IN_T);
+
+    return std::make_unique<ImportNode>(ImportNode(
+        import_tok, expression()));
+}
+
 std::unique_ptr<AssignNode> ProgramParser::assignment()
 {
     Token id_tok = curr_token;
@@ -138,6 +151,8 @@ std::unique_ptr<ExprNode> ProgramParser::expression()
 {
     switch (curr_token.type)
     {
+        case ProgramLexer::IMAGE_T:
+            return import_expr();
         case ProgramLexer::ID_T:
         case ProgramLexer::INTEGER_T:
         case ProgramLexer::FLOAT_T:

@@ -47,6 +47,7 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::FOR_T, "for"},
         {ProgramLexer::ALL_T, "all"},
         {ProgramLexer::IN_T, "in"},
+        {ProgramLexer::IMAGE_T, "image"},
         {ProgramLexer::SAVE_T, "save"},
         {ProgramLexer::AS_T, "as"},
         {ProgramLexer::FLIP_T, "flip"},
@@ -100,6 +101,7 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
     {"for", FOR_T},
     {"all", ALL_T},
     {"in", IN_T},
+    {"image", IMAGE_T},
     {"save", SAVE_T},
     {"as", AS_T},
     {"flip", FLIP_T},
@@ -158,16 +160,19 @@ Token ProgramLexer::path()
     auto c = col;
 
     bool escape = false;
-    while (escape or curr_char != '"') {
-        skip();
+    while ((escape or curr_char != '"') and (curr_char != EOF)) {
         if (curr_char == '\\')
             escape = not escape;
         else
             escape = false;
+        skip();
     }
-    match('"');
 
     auto t = text_from(p);
+
+    if (not match('"'))
+        return Token(Token::INVALID_T, t, l, c);
+
     return Token(PATH_T, t, l, c);
 }
 

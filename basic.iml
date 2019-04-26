@@ -1,12 +1,15 @@
-image = "img.png"
-rotate image by -180
-subimg = crop (2, 2, 10, 10) from image
-resize image to (100, 100)
-resize image by 0.5
-flip image vertically
-modify image contrast by 5
-for all img in dir {
-    red = img(R) / 2
-    save red as "lala.png"
+p = "img.png"
+img = image in (p)
+rotate img by -180
+subimg = crop (2, 2, 10, 10) from img
+resize img to (100, 100)
+resize img by 0.5
+flip img vertically
+modify img contrast by 5
+for all img in "dir" {
+	for all img in "dir" {
+	    red = img(R) / 2
+		save red as "lala.png"
+	}
 }
 print 0.5

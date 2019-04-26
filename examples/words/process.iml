@@ -1,0 +1,19 @@
+npath = "nouns/"
+for noun in npath {
+	resized = resize (image in npath+noun) to (100, 100)
+	save resized as npath+"processed/"+noun
+}
+
+vpath = "verbs/"
+vmark = image in "verb_mark.png"
+for verb in vpath {
+	resized = resize (image in vpath+verb) to (100, 100)
+	save resized+vmark as vpath+"processed/"+verb
+}
+
+apath = "adjectives/"
+amark = image in "adjective_mark.png"
+for adj in apath {
+	resized = resize (image in apath+adj) to (100, 100)
+	save resized+amark as apath+"processed/"+adj
+}

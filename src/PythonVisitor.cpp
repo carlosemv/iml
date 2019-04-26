@@ -161,10 +161,7 @@ void PythonVisitor::visit(UnOpNode& node)
             node.expr.get()->visit(*this);
         } else if (ProgramLexer::channel_token(op.type)) {
             node.expr.get()->visit(*this);
-            int channel = 0;
-            if (op.text == "G") channel = 1;
-            else if (op.text == "B") channel = 2;
-            output << "[" << channel << "]";
+            output << ".getchannel(" << op.text << ")";
         } else {
             throw CompilerException("Unary operation at "
                 + op.pos_string() + " has invalid token type");
@@ -420,11 +417,11 @@ const char* PythonVisitor::prog_header =
     "\n"
     "def _add(img1, img2):\n"
     "    result = img1.copy()\n"
-    "    result.paste(img2)\n"
+    "    result.paste(img2, mask=img2)\n"
     "    return result\n"
     "\n"
     "def _sub(img1, img2):\n"
-    "    return ImageChops.difference(img1, img2)\n"
+    "   return ImageChops.difference(img1, img2)\n"
     "\n"
     "def _mult(img1, img2):\n"
     "    return ImageChops.blend(img1, img2, 0.5)\n"

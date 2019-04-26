@@ -24,6 +24,8 @@ ProgramParser::ProgramParser(std::string _in) :
 
 std::optional<std::function<std::unique_ptr<CommandNode>()>> ProgramParser::get_command()
 {
+    while (match(ProgramLexer::COMMENT_T)) {}
+
     switch (curr_token.type)
     {
         case ProgramLexer::PRINT_T:

@@ -23,6 +23,7 @@ static std::map<Token::t_type, std::string> init_token_names()
                 cog.outl(map_item.format(to_id(tok_id), tok_name))
         ]]]*/
         {ProgramLexer::ID_T, "ID"},
+        {ProgramLexer::COMMENT_T, "comment"},
         {ProgramLexer::ASSIGN_T, "assign"},
         {ProgramLexer::COMMA_T, "comma"},
         {ProgramLexer::LPAREN_T, "left paren"},
@@ -222,6 +223,8 @@ std::optional<Token::t_type> ProgramLexer::char_type()
                     tok_id = to_id(tok_dict["id"])
                     cog.outl(switch_item.format(symb, tok_id))
         ]]]*/
+        case '#':
+        	return COMMENT_T;
         case '=':
         	return ASSIGN_T;
         case '(':
@@ -264,10 +267,21 @@ Token ProgramLexer::next_token()
         }
 
         if (auto t = char_type(); t) {
-            auto tok = Token(t.value(),
-                std::string(1, curr_char), line, col);
-            match(curr_char);
-            return tok;
+            auto ch = curr_char;
+            auto l = line;
+            auto c = col;
+
+            if (t == COMMENT_T) {
+                while (not is_linebreak() and
+                    curr_char != EOF) {
+                    skip();
+                }
+            } else {
+                match(curr_char);
+            }
+
+            return Token(t.value(),
+                std::string(1, ch), l, c);
         }
 
         if (match('"')) {

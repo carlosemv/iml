@@ -17,7 +17,7 @@ DECLRDIR = -I ./include
 SRCDIR = ./src/
 BINDIR = ./bin/
 
-EXEC = compiler
+EXEC = iml
 
 _OBJ = Token.o Lexer.o ProgramLexer.o Parser.o ProgramParser.o FullType.o \
 	AST/IdNode.o AST/ScalarNode.o AST/BinOpNode.o AST/UnOpNode.o \

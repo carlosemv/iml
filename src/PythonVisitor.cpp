@@ -434,6 +434,7 @@ void PythonVisitor::visit(ScalarNode& node)
 }
 
 const char* PythonVisitor::prog_header = 
+    "#!/usr/bin/env python3\n"
     "from os import walk as _walk\n"
     "from os import listdir as _listdir\n"
     "from os.path import isfile as _isfile\n"

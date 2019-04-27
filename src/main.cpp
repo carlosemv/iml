@@ -1,22 +1,11 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <optional>
 
-#include "ProgramLexer.h"
+#include "IO.h"
 #include "CompilerExceptions.h"
 #include "ProgramParser.h"
 #include "AST/ProgramNode.h"
 #include "TypeVisitor.h"
 #include "PythonVisitor.h"
-
-std::string read_file(std::string filename)
-{
-    std::ifstream in(filename, std::ios::in);
-    std::stringstream sstr;
-    sstr << in.rdbuf();
-    return sstr.str();
-}
 
 std::optional<ProgramNode> parse(std::string input)
 {
@@ -38,7 +27,7 @@ std::optional<ProgramNode> parse(std::string input)
     return std::nullopt;    
 }
 
-bool generate_py(ProgramNode& root, std::string out_file)
+bool generate(ProgramNode& root, std::string out_file)
 {
     TypeVisitor tv;
     PythonVisitor pv;
@@ -47,8 +36,7 @@ bool generate_py(ProgramNode& root, std::string out_file)
         tv.visit(root);
         pv.visit(root);
         std::cout << "Successfully compiled\n";
-        std::ofstream out(out_file, std::ios::out);
-        out << pv.output.str();
+        IO::write_file(out_file, pv.output);
         std::cout << "Output written to " << out_file
             << std::endl;
         return true;
@@ -71,12 +59,12 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    std::string input = read_file(argv[1]);
+    std::string input = IO::read_file(argv[1]);
     std::string output = argv[2];
 
     auto prog_root = parse(input);
     if (prog_root) {
-        if (generate_py(prog_root.value(), output))
+        if (generate(prog_root.value(), output))
             return EXIT_SUCCESS;
     }
 

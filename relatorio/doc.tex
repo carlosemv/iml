@@ -14,63 +14,123 @@
 \section{Introdução}
 O objetivo desse documento é descrever o trabalho final desenvolvido para a disciplina de Linguagens de Domínio Específico (MPES0019 - Tópicos Avançados em Engenharia de Software I), ministrada pelo Prof. Dr. Sérgio Queiroz de Medeiros, dentro do Programa de Pós-graduação em Engenharia de Software (PPgSW) da Universidade Federal do Rio Grande do Norte (UFRN).
 
-O trabalho tinha como objetivo geral projetar e implementar uma linguagem de domínio específico. A proposta especifíca desse projeto se deve a dois fatores: primeiramente, muitas pessoas que trabalham com edição e manipulação de imagens não tem conhecimento de linguagens de programação de propósito geral que possam usar para esse propósito. Além disso, a alternativa de usar linguagens de scripting em programas de edição de imagen (e.g. AppleScript ou VBScript com photoshop), além de necessitar de compreensão de características da linguagem irrelevantes para o processo de ediçãi, é extremamente acoplada ao programa em uso.
+O trabalho tinha como objetivo geral projetar e implementar uma linguagem de domínio específico. A proposta especifíca desse projeto se deve a dois fatores: primeiramente, muitas pessoas que trabalham com edição e manipulação de imagens não tem conhecimento de linguagens de programação de propósito geral que possam usar para esse propósito. Além disso, a alternativa de usar linguagens de scripting em programas de edição de imagem (e.g. AppleScript ou VBScript com photoshop), além de necessitar de compreensão de características da linguagem irrelevantes para o processo de edição, é extremamente acoplada ao programa em uso.
 
 Por outro lado, uma linguagem de domínio específico (DSL - \emph{Domain Specific Language}) voltada a esse propósito, além de poder ser mais simples de aprender, poderia ser mais clara e legível, e independente de qual ferramente de edição é usada na sua implementação. Por isso, propus o desenvolvimento da \emph{Image Manipulation Language} (IML), com essas vantagens em mente. O projeto dessa linguagem pode ser melhor compreendido através da sua sintaxe e da sua semântica, descritas nas sessões \ref{sec:sintaxe} e \ref{sec:semantica}, respectivamente.
 
 Além do projeto da linguagem, foi necessário implementá-la. Isso envolveu, mais especificamente, o desenvolvimento de um parser descendente recursivo, discutido na sessão \ref{sec:parser}; e geração de código em outra linguagem (no caso dessa implementação, Python), com o auxílio de \textit{Abstract Syntax Trees} (AST), discutida na sessão \ref{sec:geracao}. Na sessão \ref{sec:resultados} oferecemos alguns exemplos, e discutimos os resultados assim como possíveis melhorias futuras para a implementação. No apêndice \ref{sec:uso}, oferecemos instruções simples de como utilizar essa implementação.
 
-\section{Sintaxe de List}
+\section{Sintaxe da IML}
 \label{sec:sintaxe}
 A sintaxe da IML é descrita abaixo. O único elemento não presente nessa, por claridade, são comentários: uma linha, quando iniciada pelo caractere `\#', é ignorada.
+
+\subsection{Programa}
 \begin{align*}
 program &\rightarrow command*\\
-command &\rightarrow stmt \mid img-expr\\
-stmt &\rightarrow assignment \mid export \mid print \mid for-each\\
+command &\rightarrow stmt \mid img\text{-}expr\\
+stmt &\rightarrow assignment \mid export \mid print \mid for\text{-}each\\
 assignment &\rightarrow id \tsp \literal{=} \tsp expression\\
 export &\rightarrow \literal{save} \tsp expression \tsp \literal{as} \tsp expression\\
 print &\rightarrow \literal{print} \tsp expression\\
-for-each &\rightarrow \literal{for} \tsp \literal{all}? \tsp id \tsp \literal{in} \tsp expression \literal{\{} \tsp command* \tsp \literal{\}}\\
-expression &\rightarrow arith-expr\\
-import-expr &\rightarrow \literal{image in} \tsp expression\\
-img-expr &\rightarrow geom-expr \mid color-expr\\
-geom-expr &\rightarrow rotate-expr \mid resize-expr \mid crop-expr \mid flip-expr\\
-color-expr &\rightarrow modify-expr\\
-rotate-expr &\rightarrow \literal{rotate} \tsp expression \tsp \literal{by} \tsp expression\\
-flip-expr &\rightarrow \literal{flip} \tsp expression \tsp (\literal{vertically} \mid \literal{horizontally})\\
-resize-expr &\rightarrow \literal{resize} \tsp expression \tsp (\literal{to} \mid \literal{by}) \tsp expression\\
-crop-expr &\rightarrow \literal{crop} \tsp expression \tsp \literal{from} \tsp expression\\
-modify-expr &\rightarrow \literal{modify} \tsp expression enhancement \tsp \literal{by} \tsp expression\\
+for\text{-}each &\rightarrow \literal{for} \tsp \literal{all}? \tsp id \tsp \literal{in} \tsp expression \literal{\{} \tsp command* \tsp \literal{\}}\\
+\end{align*}
+
+\subsection{Expressões de imagem}
+\begin{align*}
+img\text{-}expr &\rightarrow geom\text{-}expr \mid color\text{-}expr\\
+geom\text{-}expr &\rightarrow rotate\text{-}expr \mid resize\text{-}expr \mid crop\text{-}expr \mid flip\text{-}expr\\
+color\text{-}expr &\rightarrow modify\text{-}expr\\
+rotate\text{-}expr &\rightarrow \literal{rotate} \tsp expression \tsp \literal{by} \tsp expression\\
+flip\text{-}expr &\rightarrow \literal{flip} \tsp expression \tsp (\literal{vertically} \mid \literal{horizontally})\\
+resize\text{-}expr &\rightarrow \literal{resize} \tsp expression \tsp (\literal{to} \mid \literal{by}) \tsp expression\\
+crop\text{-}expr &\rightarrow \literal{crop} \tsp expression \tsp \literal{from} \tsp expression\\
+modify\text{-}expr &\rightarrow \literal{modify} \tsp expression \tsp enhancement \tsp \literal{by} \tsp expression\\
 enhancement &\rightarrow \literal{sharpness} \mid \literal{brightness} \mid \literal{contrast} \mid \literal{color}\\
-shape-expr &\rightarrow dimensions \mid section\\
-dimensions &\rightarrow \literal{(} expression \literal{,} expression \literal{)}\\
-section &\rightarrow \literal{(} expression \literal{,} expression \literal{,} expression \literal{,} expression \literal{)}\\
-arith-expr &\rightarrow term \mid arith-expr \tsp (\literal{+} \mid \literal{-}) \tsp term\\
+\end{align*}
+
+\subsection{Expressões}
+\begin{align*}
+expression &\rightarrow arith\text{-}expr\\
+arith\text{-}expr &\rightarrow term \mid arith\text{-}expr \tsp (\literal{+} \mid \literal{-}) \tsp term\\
 term &\rightarrow factor \mid term \tsp (\literal{*} \mid \literal{/}) \tsp factor\\
 factor &\rightarrow atom \mid \literal{-} \tsp factor\\
 atom &\rightarrow primary \mid primary \tsp \literal{(} \tsp channel \tsp \literal{)}\\
 channel &\rightarrow \literal{R} \mid \literal{G} \mid \literal{B}\\
-primary &\rightarrow id \mid \literal{(} \tsp expression \tsp \literal{)} \mid scalar \mid import-expr \mid img-expr \mid shape-expr\\
-scalar &\rightarrow float \mid integer \mid path\\
-id &\rightarrow [a-zA-Z]+\\
-integer &\rightarrow [0-9]+\\
-float &\rightarrow integer (\literal{.} integer)?\\
-path &\rightarrow \literal{"} [\textasciicircum{}\literal{"}]* \literal{"}
+primary &\rightarrow id \mid \literal{(} \tsp expression \tsp \literal{)} \mid scalar \mid import\text{-}expr \mid img\text{-}expr \mid shape\text{-}expr\\
 \end{align*}
 
+\subsection{Expressões primitivas}
+\label{sec:primitivas}
+\begin{align*}
+import\text{-}expr &\rightarrow \literal{image} \tsp \literal{in} \tsp expression\\
+shape\text{-}expr &\rightarrow dimensions \mid section\\
+dimensions &\rightarrow \literal{(} expression \literal{,} expression \literal{)}\\
+section &\rightarrow \literal{(} expression \literal{,} expression \literal{,} expression \literal{,} expression \literal{)}\\
+scalar &\rightarrow float \mid integer \mid path\\
+id &\rightarrow [a\text{-}zA\text{-}Z]+\\
+integer &\rightarrow [0\text{-}9]+\\
+float &\rightarrow integer (\literal{.} integer)?\\
+path &\rightarrow \text" [\textasciicircum{}\text"]* \text"
+\end{align*}
 
-\section{Semântica de List}
+\section{Semântica da IML}
 \label{sec:semantica}
-Quanto a semântica de um programa na linguagem List, enquanto a maioria dos pontos foram definidos previamente na descrição do projeto, muitos foram deixados como dependentes da implementação. De qualquer forma, descrevemos resumidamente suas características semânticas abaixo.
+\subsection{Programa}
+\label{sec:programa}
+Um programa na linguagem IML é essencialmente uma sequência de comandos. Um comando pode ser da forma de uma produção $stmt$ ou de uma produção $img\text{-}expr$ (ver sessão \label{sec:sintaxe}). No primeiro caso, teremos um de quatro comandos: uma atribuição ``\textit{id} \texttt{=} \textit{expr}'', que atribui o valor de \textit{expr} a uma variável referida como \textit{id}; uma exportação ``\texttt{save} \textit{expr} \texttt{as} \textit{expr}'', que salva a imagem correpondente a primeira expressão, no caminho correspondente a segunda; uma impressão ``\texttt{print} \textit{expr}'', que mostra a expressão temporariamente em um visualizador, caso seja uma imagem, ou a imprime na saída padrão, caso contrário; ou um laço.
 
-Primeiramente, um programa na linguagem List é composto de zero ou mais comandos sequenciais. Um comando pode ser de impressão, ``\texttt{print} \textit{expr}'', que imprime o valor de \textit{expr} na saída padrão; ou de atribuição, ``\textit{ID} \texttt{=} \textit{expr}'', que atribui o valor de \textit{expr} à variável com nome \textit{ID}, que pode ou não já ter sido atribuido outro valor.
+Esse laço é iniciado da forma ``\texttt{for} \textit{id} \texttt{in} \textit{expr}'', onde a expressão  deve corresponder a um caminho (ver sessão \ref{sec:tipos}), e mais especificamente, a um diretório. Dessa forma, \textit{id} recebe o valor do caminho de um arquivo diferente nesse diretório a cada iteração. Adicionar a palavra chave opcional \texttt{all} após \texttt{for} significa que essa iteração será recursiva dentro do diretório dado.
 
-Uma expressão, assim como uma variável já atribuída, possui um de três tipos: inteiro (valores não-negativos), booleano (\texttt{true} ou \texttt{false}), ou uma lista, cujos elementos por sua vez podem ter qualquer um desses três tipos. Há duas operações em List que podem compor expressões mais básicas em expressões mais complexas, \texttt{.} e \texttt{+}. Porém, essas operações funcionam de formas diferentes dependendo dos tipos de seus operandos, e não são definidas para todas as possíveis combinações de tipos.
+Caso um comando não seja equivalente a uma produção de $stmt$, ele pode ser uma de $img\text{-}expr$, o que representa uma operação sobre uma imagem (ver sessão \ref{sec:imgops}). Nesse caso, a expressão sobre a qual se está fazendo essa operação deve ser um \textit{id}, que irá receber o resultado da operação sobre si mesma.
 
-A operação \texttt{+}, quando aplicada a dois inteiros, representa sua soma; e entre dois booleanos, sua disjunção (operador `\textit{or}'). Já quando aplicada a duas listas $l_1$ e $l_2$, o resultado será uma lista do mesmo tamanho de $l_1$, onde cada elemento na posição $i$ é o resultado de aplicar a operação \texttt{+} entre os elementos de $l_1$ e $l_2$ nessa posição. Caso $l_2$ seja menor que $l_1$, para cada $i$ maior que o tamanho de $l_2$, o elemento na posição $i$ da lista resultante terá o valor do elemento nessa mesma posição em $l_1$. Caso $l_2$ seja maior que $l_1$, os valores de $l_2$ em posições além do tamanho de $l_1$ são ignorados, já que a operação só é realizada para cada posição em $l_1$. Quando aplicado entre um booleano e uma lista, ou um inteiro e uma lista, o resultado será uma nova lista, onde cada elemento é o resultado de aplicar a operação \texttt{+} entre esse valor e cada elemento da lista original.
+\subsection{Tipos e expressões}
+\label{sec:tipos}
+Há seis tipos de dados na IML:
+\begin{itemize}
+\item Image, ou imagem;
+\item Integer, ou Int, um inteiro;
+\item Float, um número de ponto-flutuante;
+\item Path, ou caminho, uma \textit{string} correspondente a um caminho para um arquivo ou diretório;
+\item Dimensions, ou Dims, as dimensões (em pixels) de uma imagem, consiste de uma tupla (largura, altura);
+\item Section, uma sessão retangular de uma imagem, consisite de uma tupla contendo, respectivamente, os limites (em pixels) esquerdo, superior, direito, e inferior da sessão.
+\end{itemize}
+Note que para propósitos de Sections, a imagem tem sua origem no canto superior esquerdo. Qualquer expressão em IML deve necessariamente ser de um desses seis tipos. Uma expressão pode ser obtida através de operações sobre outras expressões (ver sessões \ref{sec:imgops} e \ref{sec:ops}), ou através de uma das produções primitivas, apresentadas na sessão \ref{sec:primitivas}. Variáveis com um tipo apropriado podem ser usadas em lugar de uma expressão através de seu identificador (\texttt{id}), contanto que já tenham sido atribuidas um valor (caso contrário, um erro de semântica estática será emitido durante a compilação). 
 
-A operação \texttt{.}, quando aplicada entre inteiros, representa seu produto; e entre booleanos, sua conjunção (operador `\textit{and}'). Já quando aplicada a duas lista, o resultado é a concatenação dessas. E, similarmente a \texttt{+}, se aplicada entre um booleano e uma lista ou entre um inteiro e uma lista, o resultado será uma nova lista, onde cada elemento é o resultado de aplicar a operação \texttt{.} entre esse valor e cada elemento da lista original. Note que ambas as operações são indefinidas no caso de um operando ser um booleano e outro um inteiro, o que leva a um erro de semântica estática em tempo de compilação nessa implementação. Além disso, ambas são operações comutativas, exceto quando ambos operandos são listas. Variáveis com um tipo apropriado podem ser usadas em lugar de uma expressão através de seu identificador (\texttt{ID}), contanto que já tenham sido atribuidas um valor (caso contrário, um erro de semântica estática será emitido durante a compilação). 
+\subsection{Operações sobre imagens}
+\label{sec:imgops}
+Operações sobre imagens são sentenças de IML que produzem uma imagem a partir de outra, e podem ser usadas como expressões, representando o valor da imagem produzida, ou como comandos, alterando a imagem original (ver sessão \ref{sec:programa}). Elas são cinco:
+\begin{itemize}
+\item \texttt rotate, rotaciona uma imagen no sentido antihorário pelo número dado (em graus);
+\item \texttt flip, inverte uma imagem verticalmente ou horizontalmente;
+\item \texttt resize, redimensiona uma imagem para as dimensões dadas, ou pelo fator dado;
+\item \texttt crop, recorta uma sessão dada de uma imagem, produzindo uma nova imagem desse recorte;
+\item \texttt modify, modifica um atributo de cor de uma imagem por um dado fator.
+\end{itemize}
+O atributo de cor, mencionado em \texttt{modify}, pode ser um de: \textit{sharpness}, \textit{brightness}, \textit{contrast}, ou \textit{color}.
 
+\subsection{Operações unárias e binárias}
+\label{sec:ops}
+Além das operações sobre imagens, há duas operações unárias, e quatro binárias, que podem operar sobre imagens e outros tipos. Descrevemos aqui quais dessas operações são válidas, e então o que resulta de cada uma delas. Quanto às operações unárias, há duas: a do \texttt{-} unário, que é válido somente para tipos numéricos (Integer e Float), e inverte o sinal do operando; e o operador de acesso a canal, que pode ser da forma \texttt{(R)}, \texttt{(G)}, ou \texttt{(B)}, e é válido somente para imagens, produzindo uma imagem contendo somente o canal respectivo do operando (vermelho, verde, ou azul, respectivamente).
+
+Quanto às operações binárias, há quatro: \texttt{+}, \texttt{-}, \texttt{*}, e \texttt{/}. Aparecem na tabela \ref{tab:binops} somente as operações válidas, para um operando esquerdo correspondente ao tipo da linha, e um direito ao da coluna. Além disso, são marcadas as operações não comutativas, ou seja, que produzem um resultado distinto dependendo da ordem dos operandos.
+
+\begin{table}[]
+\label{tab:binops}
+\begin{tabular}{c|c|c|c|c|c|c|}
+\cline{2-7}
+ & Image & Int & Float & Path & Dims & Section \\ \hline
+\multicolumn{1}{|c|}{Image} & \textcolor{purple}{+}, -, *, \textcolor{purple}{/} & +, *, \textcolor{purple}{/} & +, *, \textcolor{purple}{/} & +, * & +, * & \textcolor{purple}{-} \\ \hline
+\multicolumn{1}{|c|}{Int} & +, * & +, \textcolor{purple}{-}, *, \textcolor{purple}{/} & +, \textcolor{purple}{-}, *, \textcolor{purple}{/} & +, * & +, * &  \\ \hline
+\multicolumn{1}{|c|}{Float} & +, * & +, \textcolor{purple}{-}, *, \textcolor{purple}{/} & +, \textcolor{purple}{-}, *, \textcolor{purple}{/} &  &  &  \\ \hline
+\multicolumn{1}{|c|}{Path} &  &  &  & \textcolor{purple}{+} &  &  \\ \hline
+\multicolumn{1}{|c|}{Dims} &  & +, *, \textcolor{purple}{/} & +, *, \textcolor{purple}{/} &  & +, -, *, \textcolor{purple}{/} & * \\ \hline
+\multicolumn{1}{|c|}{Section} & \textcolor{purple}{-} & +, *, \textcolor{purple}{/} & +, *, \textcolor{purple}{/} &  & * & +, -, *, \textcolor{purple}{/} \\ \hline
+\end{tabular}
+\end{table}
+
+Quando ambos os operandos são imagens, temos os seguintes comportamentos: para \texttt{+}, a segunda imagem é simplesmente sobreposta sobre a primeira; para \texttt{-}, a difereça absoluta é obtida entre as duas imagens, pixel a pixel; para \texttt{*}, as duas imagens são compostas, ou seja, sobrepostas com igual contribuição para a imagem resultante; e para \texttt{/}, temos o mesmo comportamento de \texttt{*}, mas entre a primeira imagem e o inverso (em relação a cor) da segunda. Quando ambos os operandos são de tipos númericos, temos o comportamento usual de cada operação, e quando ambos os operandos são caminhos, \texttt{+} produz a concatenação desses.
+
+Quando ambos os operandos são iguais e de tipo Dims ou Section, a operação é realizada numericamente, elemento a elemento, produzindo uma expressão de mesmo tipo. Temos um comportamento similar (operação realizada elemento a elemento) quando um dos operandos é de tipo Dims ou Section, e outro é de tipo númerico. Quando um dos operandos é de tipo Dims e o outro Section, a sessão é vista como uma proporção das dimensões, e \texttt{*} produz a sessão apropriadamente dimensionada. Quando um dos operandos é uma imagem e o outro uma sessão, temos a operação \texttt{-}, que remove uma sessão da imagem, ou remove toda a imagem exceto aquela parte dentro da sessão, dependendo da ordem.
 
 \section{Parser}
 \label{sec:parser}
@@ -80,53 +140,63 @@ O parser não apenas verifica a corretude sintática do programa, mas também co
 
 \section{Geração de Código}
 \label{sec:geracao}
-Após a análise léxica e a contrução da AST pelo parser, passamos a geração de código. Essa implementação gera código equivalente em Python a partir de um programa válido na linguagem List. Esse processo envolve duas travessias pela AST. Na primeira, são determinados os tipos de expressões compostas e de variáveis, assim como verificados problemas de semântica estática, como operações indefinidas ou uso de variáveis não inicializadas. Esses problemas, se encontrados, são assim como no parser reportados na saída padrão, e interrompem o processo de geração de código.
+Após a análise léxica e a contrução da AST pelo parser, passamos a geração de código. Essa implementação gera código equivalente em Python a partir de um programa válido em IML. Esse processo envolve duas travessias pela AST. Na primeira, são determinados os tipos de expressões compostas e de variáveis, assim como verificados problemas de semântica estática, como operações indefinidas ou uso de variáveis não inicializadas. Esses problemas, se encontrados, são assim como no parser reportados na saída padrão, e interrompem o processo de geração de código.
 
-Na segunda, passamos a geração de código em si. Para isso, são necessárias algumas funções auxiliares (em Python) definidas no início de cada programa gerado. São essas funções que permitem algumas das operações ``recursivas'' de List, como \texttt{+} entre listas, ou \textit{.} entre um inteiro e uma lista que contém listas, por exemplo. Uma vez definidas essa funções (brevemente descritas abaixo), o código equivalente é gerado para cada nó da árvore e acumulado, e então escrito para um arquivo de saída pré-definido (ver apêndice \ref{sec:uso}).
+Na segunda, passamos a geração de código em si. Para isso, são necessárias algumas funções auxiliares (em Python) definidas no início de cada programa gerado. Essas funções servem somente para facilitar o processo de compilação, e gerar um código um pouco menor e mais claro. Uma vez definidas essa funções (brevemente descritas abaixo), o código equivalente é gerado para cada nó da árvore e acumulado, e então escrito para um arquivo de saída pré-definido (ver apêndice \ref{sec:uso}). Note que para as operações de manipulação de imagens, são usadas várias funções providas pelo pacote \href{https://python-pillow.org/}{Pillow} de manipulação de imagens para Python, do qual o código gerado depende.
 
 \begin{itemize}
-\item \texttt{\_sum}: aplicar \texttt{+} a dois elementos de quaisquer tipos, só é chamada por outras funções (e.g. \texttt{\_list\_sum});
-\item \texttt{\_list\_sum}: aplicar \texttt{+} a duas listas;
-\item \texttt{\_scalar\_list\_sum}: aplicar \texttt{+} entre um booleano e uma lista, ou um inteiro e uma lista;
-\item \texttt{\_scalar\_sum}: aplicar \texttt{+} entre dois booleanos ou entre dois inteiros, só é chamada por outras funções (e.g. \texttt{\_sum});
-\item \texttt{\_dot}: aplicar \texttt{.} a dois elementos de quaisquer tipos, só é chamada por outras funções (e.g. \texttt{\_scalar\_list\_dot});
-\item \texttt{\_scalar\_list\_dot}: aplicar \texttt{.} entre um booleano e uma lista, ou um inteiro e uma lista;
-\item \texttt{\_scalar\_dot}: aplicar \texttt{.} entre dois booleanos ou entre dois inteiros, só é chamada por outras funções (e.g. \texttt{\_dot});
+\item \texttt{\_resize}: redimensionar imagem dada por dimensão dada, usada pela operação de imagem de mesmo nome (ver sessão \ref{sec:imgops}).
+\item \texttt{\_crop}: obter sessão dada contida em imagem dada, usada pela operação de imagem de mesmo nome.
+\item \texttt{\_add}: realizar operação \texttt{+} entre duas imagens.
+\item \texttt{\_sub}: realizar operação \texttt{-} entre duas imagens.
+\item \texttt{\_mult}: realizar operação \texttt{*} entre duas imagens.
+\item \texttt{\_div}: realizar operação \texttt{/} entre duas imagens.
+\item \texttt{\_inv}: inverter cor de imagem, usada por \texttt{\_div}.
+\item \texttt{\_rm\_sec}: remove sessão de imagem, usada pela operação \texttt{-} entre imagem e sessão.
+\item \texttt{\_scale}: redimensionar sessão, usada pela operação \texttt{-} entre tipos Dims e Section.
 \end{itemize}
 
-Note que certas funções só são chamadas por outras funções no sentido que não são chamadas diretamente do ``\textit{main}'', já que o compilador pode chamar uma função mais específica diretamente nesses casos. Por exemplo, para \texttt{.} entre dois inteiros \texttt{a} e \texttt{b}, \texttt{\_dot(a, b)}, assim como \texttt{\_scalar\_dot(a, b)}, produziriam o resultado desejado, mas se não há listas envolvidas podemos simplesmente traduzir essa operação como \texttt{a * b} em Python. Além disso, toda função padrão se inicia com um \textit{underscore} (\_), para evitar conflitos com variáveis definidas pelo usuário de List.
+Note que toda função padrão se inicia com um \textit{underscore} (\_), para evitar conflitos com variáveis definidas pelo usuário de IML.
 
 \section{Resultados}
 \label{sec:resultados}
-Abaixo, podemos ver um exemplo de programa válido na linguagem List, e o programa equivalente gerado por essa implementação em Python (comentários adicionados posteriormente, e funções padrões omitidas). Outros exemplos estão disponíveis no diretório \texttt{examples/}, dentro do diretório raíz do projeto. Considerando isso, e o que foi apresentado até então nesse documento, todos os requisitos do projeto foram atendidos, além de verificação pelo compilador de erros de semântica estática. Um ponto em que a implementação poderia melhorar seria em indicar, no caso de operações indefinidas envolvendo um elemento de uma lista, qual elemento (por posição, ou posições no caso de listas aninhadas) causou o erro.
+Abaixo, podemos ver um exemplo de programa válido em IML, e o programa equivalente gerado por essa implementação em Python (comentários adicionados posteriormente, e funções padrões omitidas). Considerando isso, e o que foi apresentado até então nesse documento, podemos considerar que todos os requisitos do projeto foram atendidos, e que o projeto está coerente com nossa motivação inicial. O principal ponto de melhoria para esse projeto seria de melhor suporte para operações entre imagens de dimensões distintas, ou erros mais descritivos (próprios da linguagem) para operações inválidas desse tipo. 
+
+Além disso, há vários pontos de extensão atraentes, como uma forma de obter as dimensões de uma imagem, estruturas de controle condicional, e refinamento de estruturas de repetição. Esses pontos foram considerados ao longo do desenvenvolvimento do projeto, mas desenvolvimento e teste de todas as operações inicialmente propostas foram dadas como prioritárias, tendo em vista nossa motivação inicial.
 
 \begin{lstlisting}[language=IML]
-a = [0, 1, 2]
-print a + 2
-print 3 . a
-print a . [3]
+img = image in "img.png"
+frame = image in "frame.png"
 
-b = [4, [3, 2], [], 5]
-print b + a
-print [] . []
+flip img vertically
+frame = modify img * frame contrast by 3
+print frame - img
+
+p = "my/imgs/dir/"
+for img in p {
+	save (image in img) + frame as p+"/new/"+img
+}
 \end{lstlisting}
 
 \begin{lstlisting}[language=Python, numbers=left, numberstyle=\scriptsize]
 # after standard functions
 
-a = [0, 1, 2]
-print(_scalar_list_sum(2, a))	# gives [2, 3, 4]
-print(_scalar_list_dot(3, a))	# gives [0, 3, 6]
-print((a + [3]))		# gives [0, 1, 2, 3]
-b = [4, [3, 2], [], 5]
-print(_list_sum(b, a))		# gives [4, [4, 3], [], 5]
-print(([] + []))		# gives []
+img = Image.open("img.png").convert("RGBA")
+frame = Image.open("frame.png").convert("RGBA")
+
+img = img.transpose(Image.FLIP_TOP_BOTTOM)
+frame = ImageEnhance.Contrast(_mult(img, frame)).enhance(3)
+_sub(frame, img).show()
+
+p = "my/imgs/dir/"
+for img in (_f for _f in _listdir(p) if _isfile(p+_f)):
+    _add(Image.open(img).convert("RGBA"), frame).save(((p + "/new/") + img))
 \end{lstlisting}
 
 \appendix
 \section{Uso}
 \label{sec:uso}
-Para compilação do projeto, é necessário um compilador compatível com o padrão c++-17, e para execução dos códigos produzidos, um interpretador Python com versão igual ou superior a 3.6. A compilação do projeto é feita através do comando \texttt{make}, no diretório raíz do projeto, o que produzirá um executável \texttt{bin/compiler}.
+Para compilação do projeto, é necessário um compilador compatível com o padrão c++-17. Para execução dos códigos produzidos, é necessesário um interpretador Python com versão igual ou superior a 3.5, além de uma versão igual ou superior a 6.0 do pacote \href{https://python-pillow.org/}{Pillow} instalada. A compilação do projeto é feita através do comando \texttt{make}, no diretório raíz do projeto, o que produzirá um executável \texttt{bin/iml}.
 
-Para executá-lo, então, faça \texttt{./bin/compiler <in> <out>}, onde \texttt{<in>} é o arquivo de entrada, um programa na linguagem List, e \texttt{<out>} onde será escrito o código resultante em Python, no caso de compilação bem-sucedida. No caso de erros, estes são reportados na saída padrão, e nenhum código será gerado.
+Para executá-lo, então, faça \texttt{./bin/iml <in> <out>}, onde \texttt{<in>} é o arquivo de entrada, um programa na linguagem IML, e \texttt{<out>} onde será escrito o código resultante em Python, no caso de compilação bem-sucedida. No caso de erros, estes são reportados na saída padrão, e nenhum código será gerado.
 \end{document}

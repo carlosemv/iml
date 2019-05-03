@@ -30,8 +30,9 @@ void PythonVisitor::visit(DimensionsNode& node)
 
 void PythonVisitor::visit(ExportNode& node)
 {
+    output << "_save(";
     node.image.get()->visit(*this);
-    output << ".save(";
+    output << ", ";
     node.path.get()->visit(*this);
     output << ")";
 }
@@ -486,5 +487,11 @@ const char* PythonVisitor::prog_header =
     "\n"
     "def _scale(section, dims):\n"
     "    return tuple(b*d for b, d in zip(section, 2*dims))\n"
+    "\n"
+    "def _save(img, path):\n"
+    "    if path.lower().endswith(('.jpg', '.jpeg')):\n"
+    "        img.convert(\"RGB\").save(path)\n"
+    "    else:\n"
+    "        img.save(path)\n"
     "\n"
     "\n";

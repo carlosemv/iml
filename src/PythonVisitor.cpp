@@ -423,9 +423,9 @@ void PythonVisitor::visit(ScalarNode& node)
 {
     if (node.token) {
         if (node.ftype.type == ExprType::Path) {
-            output << '"';
+            output << "_Path(\"";
             output << node.token.value().text;
-            output << '"';
+            output << "\")";
         } else {
             output << node.token.value().text;
         }
@@ -440,6 +440,7 @@ const char* PythonVisitor::prog_header =
     "from os import listdir as _listdir\n"
     "from os.path import isfile as _isfile\n"
     "from itertools import chain as _chain\n"
+    "from pathlib import Path as _Path\n"
     "from PIL import Image, ImageEnhance, ImageChops, ImageFile\n"
     "ImageFile.LOAD_TRUNCATED_IMAGES = True\n"
     "\n"

@@ -70,11 +70,11 @@ void PythonVisitor::visit(ForNode& node)
         node.path.get()->visit(*this);
         output << ")]):";
     } else {
-        output << "(_f for _f in _listdir(";
+        output << "filter(_isfile, (";
         node.path.get()->visit(*this);
-        output << ") if _isfile(";
+        output << "/_f for _f in _listdir(";
         node.path.get()->visit(*this);
-        output << "+_f)):";
+        output << "))):";
     }
     output << std::endl;
 

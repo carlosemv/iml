@@ -404,7 +404,7 @@ void PythonVisitor::visit(BinOpNode& node)
 void PythonVisitor::visit(IdNode& node)
 {
     if (node.token) {
-        output << node.token.value().text;
+        output << node.token.value().text << "_";
     } else {
         throw CompilerException("Id node has no token\n");
     }

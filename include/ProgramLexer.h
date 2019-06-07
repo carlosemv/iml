@@ -69,8 +69,9 @@ public:
     static constexpr Token::t_type COLOR_T = Lexer::LAST_T + 40;
     static constexpr Token::t_type UNMINUS_T = Lexer::LAST_T + 41;
     static constexpr Token::t_type SECTION_T = Lexer::LAST_T + 42;
-    static constexpr Token::t_type DIMENSIONS_T = Lexer::LAST_T + 43;
-    static constexpr Token::t_type PROG_T = Lexer::LAST_T + 44;
+    static constexpr Token::t_type DIMS_T = Lexer::LAST_T + 43;
+    static constexpr Token::t_type DIMENSIONS_T = Lexer::LAST_T + 44;
+    static constexpr Token::t_type PROG_T = Lexer::LAST_T + 45;
     static constexpr Token::t_type LAST_T = PROG_T;
     //[[[end]]]
 

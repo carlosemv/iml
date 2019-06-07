@@ -149,11 +149,6 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
         std::move(path), std::move(cmds)));
 }
 
-std::unique_ptr<ExprNode> ProgramParser::expression()
-{
-    return arith_expr();
-}
-
 std::unique_ptr<ExprNode> ProgramParser::img_expr()
 {
     Token expr_tok = curr_token;
@@ -266,7 +261,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
             throw_unexpected(ProgramLexer::RPAREN_T);
 
         return std::make_unique<DimensionsNode>(DimensionsNode(
-            ProgramLexer::DIMENSIONS_T,
+            ProgramLexer::DIMS_T,
             std::move(components[0]), std::move(components[1])));
     }
 
@@ -282,6 +277,40 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
         std::move(components[0]), std::move(components[1]),
         std::move(components[2]), std::move(components[3])));
 }
+
+std::unique_ptr<ExprNode> ProgramParser::expression()
+{
+    std::unique_ptr<ExprNode> root = arith_expr();
+
+    if (match(ProgramLexer::LPAREN_T)) {
+        switch (curr_token.type) {
+            case ProgramLexer::R_T:
+            case ProgramLexer::G_T:
+            case ProgramLexer::B_T:
+            {
+                root = std::make_unique<UnOpNode>(
+                    UnOpNode(curr_token, std::move(root)));
+                skip();
+                if (not match(ProgramLexer::RPAREN_T))
+                    throw_unexpected(ProgramLexer::RPAREN_T);
+                return root;
+            }
+            default:
+                throw_unexpected("channel");
+        }
+    }
+
+    Token op_tok = curr_token;
+    if (match(ProgramLexer::DIMENSIONS_T)) {
+        std::cout << ProgramLexer::get_token_name(op_tok.type) << std::endl;
+        root = std::make_unique<UnOpNode>(
+            UnOpNode(op_tok, std::move(root)));
+        return root;
+    }
+
+    return root;
+}
+
 
 std::unique_ptr<ExprNode> ProgramParser::arith_expr()
 {
@@ -326,24 +355,6 @@ std::unique_ptr<ExprNode> ProgramParser::factor()
 std::unique_ptr<ExprNode> ProgramParser::atom()
 {
     std::unique_ptr<ExprNode> root = primary();
-
-    if (match(ProgramLexer::LPAREN_T)) {
-        switch (curr_token.type) {
-            case ProgramLexer::R_T:
-            case ProgramLexer::G_T:
-            case ProgramLexer::B_T:
-            {
-                root = std::make_unique<UnOpNode>(
-                    UnOpNode(curr_token, std::move(root)));
-                skip();
-                if (not match(ProgramLexer::RPAREN_T))
-                    throw_unexpected(ProgramLexer::RPAREN_T);
-                return root;
-            }
-            default:
-                throw_unexpected("channel");
-        }
-    }
 
     return root;
 }

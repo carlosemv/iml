@@ -64,7 +64,8 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::COLOR_T, "color"},
         {ProgramLexer::UNMINUS_T, "unminus"},
         {ProgramLexer::SECTION_T, "section"},
-        {ProgramLexer::DIMENSIONS_T, "dimensions"},
+        {ProgramLexer::DIMS_T, "dimensions"},
+        {ProgramLexer::DIMENSIONS_T, "dimensions operator"},
         {ProgramLexer::PROG_T, "program"},
         //[[[end]]]
     };
@@ -89,9 +90,8 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
         tokens = json.load(f)
         for tok_dict in tokens:
             tok_id = tok_dict["id"]
-            tok_name = tok_dict.get("name", tok_id)
             if tok_dict.get("keyword"):
-                cog.outl(map_item.format(tok_name, to_id(tok_id)))
+                cog.outl(map_item.format(tok_id, to_id(tok_id)))
     ]]]*/
     {"print", PRINT_T},
     {"rotate", ROTATE_T},
@@ -117,6 +117,7 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
     {"brightness", BRIGHTNESS_T},
     {"contrast", CONTRAST_T},
     {"color", COLOR_T},
+    {"dimensions", DIMENSIONS_T},
     //[[[end]]]
 };
 

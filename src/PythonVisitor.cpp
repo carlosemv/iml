@@ -169,9 +169,12 @@ void PythonVisitor::visit(UnOpNode& node)
         if (op.type == ProgramLexer::UNMINUS_T) {
             output << op.text;
             node.expr.get()->visit(*this);
+        } else if (op.type == ProgramLexer::DIMENSIONS_T) {
+            node.expr.get()->visit(*this);
+            output << ".size";
         } else if (ProgramLexer::channel_token(op.type)) {
             node.expr.get()->visit(*this);
-            output << ".getchannel(" << op.text << ")";
+            output << ".getchannel('" << op.text << "')";
         } else {
             throw CompilerException("Unary operation at "
                 + op.pos_string() + " has invalid token type");
@@ -223,7 +226,7 @@ void PythonVisitor::visit(BinOpNode& node)
                 operation = "+";
             } else if (lhs.type == rhs.type
                 and lhs.type == ExprType::Path) {
-                operation = "+";
+                func_call = "_path_sum";
             } else if (lhs.type == rhs.type
                 and lhs.is_list()) {
                 output << "tuple(_a+_b for _a,_b in zip(";
@@ -344,6 +347,9 @@ void PythonVisitor::visit(BinOpNode& node)
                 func_call = "_div";
             } else if (lhs.is_num() and rhs.is_num()) {
                 operation = "/";
+            } else if (lhs.type == rhs.type
+                and lhs.type == ExprType::Path) {
+                func_call = "_path_div";
             } else if (lhs.type == ExprType::Image
                 and rhs.is_num()) {
                 node.lhs.get()->visit(*this);
@@ -494,5 +500,19 @@ const char* PythonVisitor::prog_header =
     "        img.convert(\"RGB\").save(path)\n"
     "    else:\n"
     "        img.save(path)\n"
+    "\n"
+    "def _path_sum(p1, p2):\n"
+    "    name = p1.stem + p2.stem + p1.suffix\n"
+    "    return p1.with_name(name)\n"
+    "\n"
+    "def _path_div(p1, p2):\n"
+    "    if p1.suffix:\n"
+    "        path = p1.parent / p2\n"
+    "        if p2.suffix:\n"
+    "            return path\n"
+    "        else:\n"
+    "            return path / p1.name\n"
+    "    else:\n"
+    "        return p1 / p2\n"
     "\n"
     "\n";

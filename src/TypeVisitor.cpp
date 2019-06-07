@@ -187,6 +187,15 @@ void TypeVisitor::visit(UnOpNode& node)
                 node.ftype.type = expr_type.type;
                 return;
             }
+        } else if (op.type == ProgramLexer::DIMENSIONS_T) {
+            if (expr_type.type == ExprType::Image) {
+                node.ftype.type = ExprType::Dimensions;
+                node.ftype.list_types = {
+                    FullType(ExprType::Integer),
+                    FullType(ExprType::Integer)
+                };
+                return;
+            }
         } else if (ProgramLexer::channel_token(op.type)) {
             if (expr_type.type == ExprType::Image) {
                 node.ftype.type = expr_type.type;
@@ -280,15 +289,16 @@ FullType TypeVisitor::binop_type(Token op,
             if (rhs.is_list() and lhs.is_num())
                 return rhs;
 
-            if (lhs.is_list() and rhs.is_list())
-                return FullType(ExprType::Section);
+            if (lhs.is_list() and rhs.is_list()) {
+                if (lhs.type == ExprType::Section)
+                    return lhs;
+                else
+                    return rhs;
+            }
             break;
         case ProgramLexer::DIV_T:
             if (lhs.type == rhs.type) {
-                if (lhs.type != ExprType::Path)
-                    return lhs;
-                else
-                    break;
+                return lhs;
             }
 
             if (lhs.type == ExprType::Image

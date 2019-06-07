@@ -1,5 +1,6 @@
 #include "AST/ASTVisitor.h"
 #include "ProgramLexer.h"
+#include "CompilerExceptions.h"
 #include <iostream>
 
 void ASTVisitor::visit(ExprNode& node)
@@ -14,7 +15,7 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::SECTION_T:
                 cast_visit<SectionNode&>(node, "SectionNode");
                 break;
-            case ProgramLexer::DIMENSIONS_T:
+            case ProgramLexer::DIMS_T:
                 cast_visit<DimensionsNode&>(node, "DimensionsNode");
                 break;
             case ProgramLexer::ID_T:
@@ -27,6 +28,7 @@ void ASTVisitor::visit(ExprNode& node)
                 cast_visit<BinOpNode&>(node, "BinOpNode");
                 break;
             case ProgramLexer::UNMINUS_T:
+            case ProgramLexer::DIMENSIONS_T:
             case ProgramLexer::R_T:
             case ProgramLexer::G_T:
             case ProgramLexer::B_T:
@@ -54,12 +56,12 @@ void ASTVisitor::visit(ExprNode& node)
             {
                 auto name = ProgramLexer::get_token_name(
                     node.token.value().type);
-                throw std::logic_error("Expression has "\
+                throw CompilerException("Expression has "\
                     "unkown associated token type \""+name+"\"\n");
             }
         }
     } else {
-        throw std::logic_error("Expression "\
+        throw CompilerException("Expression "\
             " has no defining token\n");
     }
 }
@@ -96,11 +98,11 @@ void ASTVisitor::visit(CommandNode& node)
             default:
                 auto name = ProgramLexer::get_token_name(
                     node.token.value().type);
-                throw std::logic_error("Command has "\
+                throw CompilerException("Command has "\
                     "unkown associated token type \""+name+"\"\n");
         }
     } else {
-        throw std::logic_error("Command "\
+        throw CompilerException("Command "\
             " has no defining token\n");
     }
 }

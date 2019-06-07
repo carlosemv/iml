@@ -357,9 +357,9 @@ void PythonVisitor::visit(BinOpNode& node)
                 node.rhs.get()->visit(*this);
                 output << ")";
             } else if (lhs.is_list() and rhs.is_num()) {
-                output << "tuple(";
+                output << "tuple(_c / ";
                 node.rhs.get()->visit(*this);
-                output << " / _c for _c in ";
+                output << " for _c in ";
                 node.lhs.get()->visit(*this);
                 output << ")";
             } else if (lhs.type == rhs.type

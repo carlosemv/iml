@@ -71,7 +71,7 @@ std::unique_ptr<PrintNode> ProgramParser::print_stmt()
     if (not match(ProgramLexer::PRINT_T))
         throw_unexpected(ProgramLexer::PRINT_T);
 
-    return std::make_unique<PrintNode>(PrintNode(print_tok, expression()));
+    return std::make_unique<PrintNode>(print_tok, expression());
 }
 
 std::unique_ptr<ExportNode> ProgramParser::export_stmt()
@@ -85,8 +85,8 @@ std::unique_ptr<ExportNode> ProgramParser::export_stmt()
     if (not match(ProgramLexer::AS_T))
         throw_unexpected(ProgramLexer::AS_T);
 
-    return std::make_unique<ExportNode>(ExportNode(
-        export_tok, std::move(img), expression()));
+    return std::make_unique<ExportNode>(export_tok,
+        std::move(img), expression());
 }
 
 std::unique_ptr<ExprNode> ProgramParser::import_expr()
@@ -97,8 +97,8 @@ std::unique_ptr<ExprNode> ProgramParser::import_expr()
     if (not match(ProgramLexer::IN_T))
         throw_unexpected(ProgramLexer::IN_T);
 
-    return std::make_unique<ImportNode>(ImportNode(
-        import_tok, expression()));
+    return std::make_unique<ImportNode>(import_tok,
+        expression());
 }
 
 std::unique_ptr<AssignNode> ProgramParser::assignment()
@@ -111,8 +111,8 @@ std::unique_ptr<AssignNode> ProgramParser::assignment()
     if (not match(ProgramLexer::ASSIGN_T))
         throw_unexpected(ProgramLexer::ASSIGN_T);
 
-    return std::make_unique<AssignNode>(
-        AssignNode(assign_tok, IdNode(id_tok), expression()));
+    return std::make_unique<AssignNode>(assign_tok,
+        IdNode(id_tok), expression());
 }
 
 std::unique_ptr<ForNode> ProgramParser::for_stmt()
@@ -144,9 +144,8 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
     if (not match(ProgramLexer::RBRACE_T))
         throw_unexpected(ProgramLexer::RBRACE_T);
 
-    return std::make_unique<ForNode>(ForNode(
-        for_tok, recursive, iterator,
-        std::move(path), std::move(cmds)));
+    return std::make_unique<ForNode>(for_tok, recursive,
+        iterator, std::move(path), std::move(cmds));
 }
 
 std::unique_ptr<ExprNode> ProgramParser::img_expr()
@@ -160,8 +159,8 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
             std::unique_ptr<ExprNode> img = expression();
             if (not match(ProgramLexer::BY_T))
                 throw_unexpected(ProgramLexer::BY_T);
-            return std::make_unique<RotateNode>(RotateNode(
-                expr_tok, std::move(img), expression()));
+            return std::make_unique<RotateNode>(
+                expr_tok, std::move(img), expression());
         }
         case ProgramLexer::RESIZE_T:
         {
@@ -175,8 +174,8 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
             else
                 throw_unexpected("resize specifier");
             skip();
-            return std::make_unique<ResizeNode>(ResizeNode(
-                expr_tok, re_type, std::move(img), expression()));
+            return std::make_unique<ResizeNode>(expr_tok,
+                re_type, std::move(img), expression());
         }
         case ProgramLexer::CROP_T:
         {
@@ -184,8 +183,8 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
             std::unique_ptr<ExprNode> section = expression();
             if (not match(ProgramLexer::FROM_T))
                 throw_unexpected(ProgramLexer::FROM_T);
-            return std::make_unique<CropNode>(CropNode(
-                expr_tok, std::move(section), expression()));
+            return std::make_unique<CropNode>(expr_tok,
+                std::move(section), expression());
         }
         case ProgramLexer::FLIP_T:
         {
@@ -199,8 +198,8 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
             else
                 throw_unexpected("flip direction");
             skip();
-            return std::make_unique<FlipNode>(FlipNode(
-                expr_tok, dir, std::move(img)));
+            return std::make_unique<FlipNode>(
+                expr_tok, dir, std::move(img));
         }
         case ProgramLexer::MODIFY_T:
         {
@@ -217,8 +216,8 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
             if (not match(ProgramLexer::BY_T))
                 throw_unexpected(ProgramLexer::BY_T);
 
-            return std::make_unique<ModifyNode>(ModifyNode(
-                expr_tok, mod, std::move(img), expression()));
+            return std::make_unique<ModifyNode>(expr_tok,
+                mod, std::move(img), expression());
         }
         default:
             throw_unexpected("image expression");
@@ -260,9 +259,8 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
         if (not match(ProgramLexer::RPAREN_T))
             throw_unexpected(ProgramLexer::RPAREN_T);
 
-        return std::make_unique<DimensionsNode>(DimensionsNode(
-            ProgramLexer::DIMS_T,
-            std::move(components[0]), std::move(components[1])));
+        return std::make_unique<DimensionsNode>(ProgramLexer::DIMS_T,
+            std::move(components[0]), std::move(components[1]));
     }
 
     // four components, make section
@@ -273,9 +271,9 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
     if (not match(ProgramLexer::RPAREN_T))
         throw_unexpected(ProgramLexer::RPAREN_T);
 
-    return std::make_unique<SectionNode>(SectionNode(ProgramLexer::SECTION_T,
+    return std::make_unique<SectionNode>(ProgramLexer::SECTION_T,
         std::move(components[0]), std::move(components[1]),
-        std::move(components[2]), std::move(components[3])));
+        std::move(components[2]), std::move(components[3]));
 }
 
 std::unique_ptr<ExprNode> ProgramParser::expression()
@@ -289,7 +287,7 @@ std::unique_ptr<ExprNode> ProgramParser::expression()
             case ProgramLexer::B_T:
             {
                 root = std::make_unique<UnOpNode>(
-                    UnOpNode(curr_token, std::move(root)));
+                    curr_token, std::move(root));
                 skip();
                 if (not match(ProgramLexer::RPAREN_T))
                     throw_unexpected(ProgramLexer::RPAREN_T);
@@ -303,8 +301,7 @@ std::unique_ptr<ExprNode> ProgramParser::expression()
     Token op_tok = curr_token;
     if (match(ProgramLexer::DIMENSIONS_T)) {
         std::cout << ProgramLexer::get_token_name(op_tok.type) << std::endl;
-        root = std::make_unique<UnOpNode>(
-            UnOpNode(op_tok, std::move(root)));
+        root = std::make_unique<UnOpNode>(op_tok, std::move(root));
         return root;
     }
 
@@ -319,7 +316,7 @@ std::unique_ptr<ExprNode> ProgramParser::arith_expr()
     Token op_tok = curr_token;
     while (match({ProgramLexer::PLUS_T, ProgramLexer::MINUS_T})) {
         root = std::make_unique<BinOpNode>(
-            BinOpNode(std::move(root), op_tok, term()));
+            std::move(root), op_tok, term());
         op_tok = curr_token;
     }
 
@@ -333,7 +330,7 @@ std::unique_ptr<ExprNode> ProgramParser::term()
     Token op_tok = curr_token;
     while (match({ProgramLexer::MULT_T, ProgramLexer::DIV_T})) {
         root = std::make_unique<BinOpNode>(
-            BinOpNode(std::move(root), op_tok, factor()));
+            std::move(root), op_tok, factor());
         op_tok = curr_token;
     }
 
@@ -345,8 +342,7 @@ std::unique_ptr<ExprNode> ProgramParser::factor()
     Token op_tok = curr_token;
     if (match(ProgramLexer::MINUS_T)) {
         op_tok.type = ProgramLexer::UNMINUS_T;
-        return std::make_unique<UnOpNode>(
-            UnOpNode(op_tok, factor()));
+        return std::make_unique<UnOpNode>(op_tok, factor());
     }
 
     return atom();

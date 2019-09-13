@@ -23,7 +23,7 @@ struct FullType
     std::vector<FullType> list_types;
 
     FullType();
-    FullType(ExprType _type);
+    explicit FullType(ExprType _type);
     std::string to_string() const;
     bool is_num() const;
     bool is_list() const;

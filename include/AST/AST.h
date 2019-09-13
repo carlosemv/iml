@@ -9,8 +9,8 @@ class AST
 {
 public:
     AST() = default;
-    AST(Token _tok) : token(_tok) {}
-    AST(Token::t_type _t) : token(Token(_t)) {}
+    explicit AST(Token _tok) : token(_tok) {}
+    explicit AST(Token::t_type _t) : token(Token(_t)) {}
 
     std::optional<Token> token;
 };

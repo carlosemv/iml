@@ -8,7 +8,7 @@ class ASTVisitor;
 class IdNode : public ExprNode
 {
 public:
-    IdNode(Token _t);
+    explicit IdNode(Token _t);
     void visit(ASTVisitor& visitor);
 };
 

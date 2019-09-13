@@ -1,8 +1,5 @@
 #include "FullType.h"
 
-FullType::FullType() : type(ExprType::Invalid)
-{}
-
 FullType::FullType(ExprType _type) : type(_type)
 {}
 

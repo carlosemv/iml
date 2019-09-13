@@ -9,7 +9,7 @@ class ASTVisitor;
 class PrintNode : public CommandNode
 {
 public:
-    PrintNode(Token _t, ExprNode _expr);
+    PrintNode(Token _t, const ExprNode& _expr);
     PrintNode(Token _t, std::unique_ptr<ExprNode> _expr);
     void visit(ASTVisitor& visitor);
 

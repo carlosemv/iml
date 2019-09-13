@@ -1,7 +1,7 @@
 #include "AST/DimensionsNode.h"
 #include "AST/ASTVisitor.h"
 
-DimensionsNode::DimensionsNode(Token::t_type _t, ExprNode _width, ExprNode _height) :
+DimensionsNode::DimensionsNode(Token::t_type _t, const ExprNode& _width, const ExprNode& _height) :
     ExprNode(_t, ExprType::Dimensions),
     width(std::make_unique<ExprNode>(_width)),
     height(std::make_unique<ExprNode>(_height))

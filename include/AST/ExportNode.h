@@ -11,7 +11,7 @@ class ExportNode : public CommandNode
 private:
     using expr_ptr = std::unique_ptr<ExprNode>;
 public:
-    ExportNode(Token _t, ExprNode _img, ExprNode _path);
+    ExportNode(Token _t, const ExprNode& _img, const ExprNode& _path);
     ExportNode(Token _t, expr_ptr _img, expr_ptr _path);
     void visit(ASTVisitor& visitor);
 

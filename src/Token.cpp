@@ -1,7 +1,9 @@
 #include "Token.h"
 
+#include <utility>
+
 Token::Token(t_type _type, std::string _text, unsigned _line, unsigned _col) :
-    type(_type), text(_text), line(_line), col(_col)
+    type(_type), text(std::move(_text)), line(_line), col(_col)
 {}
 
 std::string Token::pos_string()

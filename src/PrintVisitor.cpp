@@ -2,9 +2,6 @@
 #include "CompilerExceptions.h"
 #include "ProgramLexer.h"
 
-PrintVisitor::PrintVisitor()  
-{}
-
 void PrintVisitor::visit(CropNode& node)
 {
     std::cout << "crop ";

@@ -8,57 +8,57 @@ TypeVisitor::TypeVisitor() : sym_table(1)
 void TypeVisitor::visit(CropNode& node)
 {
     if (node.command) {
-        check_id(node.image.get()->token,
-            node.image.get()->ftype);
+        check_id(node.image->token,
+            node.image->ftype);
     }
 
-    node.section.get()->visit(*this);
-    check_section(node.section.get()->token,
-        node.section.get()->ftype);
+    node.section->visit(*this);
+    check_section(node.section->token,
+        node.section->ftype);
 
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
     node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(DimensionsNode& node)
 {
-    node.width.get()->visit(*this);
-    check_num(node.width.get()->token,
-        node.width.get()->ftype);
+    node.width->visit(*this);
+    check_num(node.width->token,
+        node.width->ftype);
 
-    node.height.get()->visit(*this);
-    check_num(node.height.get()->token,
-        node.height.get()->ftype);
+    node.height->visit(*this);
+    check_num(node.height->token,
+        node.height->ftype);
 
     node.ftype = FullType(ExprType::Dimensions);
-    node.ftype.list_types = {node.width.get()->ftype,
-        node.height.get()->ftype};
+    node.ftype.list_types = {node.width->ftype,
+        node.height->ftype};
 }
 
 void TypeVisitor::visit(ExportNode& node)
 {
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
-    node.path.get()->visit(*this);
-    check_path(node.path.get()->token,
-        node.path.get()->ftype);
+    node.path->visit(*this);
+    check_path(node.path->token,
+        node.path->ftype);
 }
 
 void TypeVisitor::visit(FlipNode& node)
 {
     if (node.command) {
-        check_id(node.image.get()->token,
-            node.image.get()->ftype);
+        check_id(node.image->token,
+            node.image->ftype);
     }
 
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
     node.ftype = FullType(ExprType::Image);
 }
@@ -67,14 +67,14 @@ void TypeVisitor::visit(ForNode& node)
 {
     sym_table.emplace_front();
 
-    node.path.get()->visit(*this);
-    check_path(node.path.get()->token,
-        node.path.get()->ftype);
+    node.path->visit(*this);
+    check_path(node.path->token,
+        node.path->ftype);
 
-    auto iter = node.iterator.get()->token.value().text;
+    auto iter = node.iterator->token.value().text;
     sym_table.front()[iter] = FullType(ExprType::Path);
     for (auto& cmd : node.cmds) {
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
     }
 
     sym_table.pop_front();
@@ -82,9 +82,9 @@ void TypeVisitor::visit(ForNode& node)
 
 void TypeVisitor::visit(ImportNode& node)
 {
-    node.path.get()->visit(*this);
-    check_path(node.path.get()->token,
-        node.path.get()->ftype);
+    node.path->visit(*this);
+    check_path(node.path->token,
+        node.path->ftype);
 
     node.ftype = FullType(ExprType::Image);
 }
@@ -92,17 +92,17 @@ void TypeVisitor::visit(ImportNode& node)
 void TypeVisitor::visit(ModifyNode& node)
 {
     if (node.command) {
-        check_id(node.image.get()->token,
-            node.image.get()->ftype);
+        check_id(node.image->token,
+            node.image->ftype);
     }
 
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
-    node.factor.get()->visit(*this);
-    check_num(node.factor.get()->token,
-        node.factor.get()->ftype);
+    node.factor->visit(*this);
+    check_num(node.factor->token,
+        node.factor->ftype);
 
     node.ftype = FullType(ExprType::Image);
 }
@@ -110,21 +110,21 @@ void TypeVisitor::visit(ModifyNode& node)
 void TypeVisitor::visit(ResizeNode& node)
 {
     if (node.command) {
-        check_id(node.image.get()->token,
-            node.image.get()->ftype);
+        check_id(node.image->token,
+            node.image->ftype);
     }
     
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
-    node.resize.get()->visit(*this);
+    node.resize->visit(*this);
     if (node.resize_type == ResizeType::Absolute) {
-        check_dimensions(node.resize.get()->token,
-            node.resize.get()->ftype);
+        check_dimensions(node.resize->token,
+            node.resize->ftype);
     } else {
-        check_num(node.resize.get()->token,
-            node.resize.get()->ftype);
+        check_num(node.resize->token,
+            node.resize->ftype);
     }
 
     node.ftype = FullType(ExprType::Image);
@@ -133,52 +133,52 @@ void TypeVisitor::visit(ResizeNode& node)
 void TypeVisitor::visit(RotateNode& node)
 {
     if (node.command) {
-        check_id(node.image.get()->token,
-            node.image.get()->ftype);
+        check_id(node.image->token,
+            node.image->ftype);
     }
 
-    node.image.get()->visit(*this);
-    check_image(node.image.get()->token,
-        node.image.get()->ftype);
+    node.image->visit(*this);
+    check_image(node.image->token,
+        node.image->ftype);
 
-    node.rotation.get()->visit(*this);
-    check_num(node.rotation.get()->token,
-        node.rotation.get()->ftype);
+    node.rotation->visit(*this);
+    check_num(node.rotation->token,
+        node.rotation->ftype);
 
     node.ftype = FullType(ExprType::Image);
 }
 
 void TypeVisitor::visit(SectionNode& node)
 {
-    node.left.get()->visit(*this);
-    check_num(node.left.get()->token,
-        node.left.get()->ftype);
+    node.left->visit(*this);
+    check_num(node.left->token,
+        node.left->ftype);
 
-    node.upper.get()->visit(*this);
-    check_num(node.upper.get()->token,
-        node.upper.get()->ftype);
+    node.upper->visit(*this);
+    check_num(node.upper->token,
+        node.upper->ftype);
 
-    node.right.get()->visit(*this);
-    check_num(node.right.get()->token,
-        node.right.get()->ftype);
+    node.right->visit(*this);
+    check_num(node.right->token,
+        node.right->ftype);
 
-    node.lower.get()->visit(*this);
-    check_num(node.lower.get()->token,
-        node.lower.get()->ftype);
+    node.lower->visit(*this);
+    check_num(node.lower->token,
+        node.lower->ftype);
 
     node.ftype = FullType(ExprType::Section);
     node.ftype.list_types = {
-        node.left.get()->ftype,
-        node.upper.get()->ftype,
-        node.right.get()->ftype,
-        node.lower.get()->ftype
+        node.left->ftype,
+        node.upper->ftype,
+        node.right->ftype,
+        node.lower->ftype
     };
 }
 
 void TypeVisitor::visit(UnOpNode& node)
 {
-    node.expr.get()->visit(*this);
-    auto expr_type = node.expr.get()->ftype;
+    node.expr->visit(*this);
+    auto expr_type = node.expr->ftype;
 
     if (node.token) {
         auto op = node.token.value();
@@ -217,19 +217,19 @@ void TypeVisitor::visit(UnOpNode& node)
 
 void TypeVisitor::visit(AssignNode& node)
 {
-    node.expr.get()->visit(*this);
-    node.id.get()->ftype = node.expr.get()->ftype;
+    node.expr->visit(*this);
+    node.id->ftype = node.expr->ftype;
 
-    if (not node.id.get()->token)
+    if (not node.id->token)
         throw CompilerException("Variable has no defining token");
 
-    sym_table.front()[node.id.get()->token.value().text] = 
-        node.id.get()->ftype;
+    sym_table.front()[node.id->token.value().text] = 
+        node.id->ftype;
 }
 
 void TypeVisitor::visit(PrintNode& node)
 {
-    node.expr.get()->visit(*this);
+    node.expr->visit(*this);
 }
 
 FullType TypeVisitor::binop_type(Token op,
@@ -255,8 +255,7 @@ FullType TypeVisitor::binop_type(Token op,
             if (lhs.type == rhs.type) {
                 if (lhs.type != ExprType::Path)
                     return lhs;
-                else
-                    break;
+                break;
             }
 
             if (lhs.is_num() and rhs.is_num())
@@ -273,8 +272,7 @@ FullType TypeVisitor::binop_type(Token op,
             if (lhs.type == rhs.type) {
                 if (lhs.type != ExprType::Path)
                     return lhs;
-                else
-                    break;
+                break;
             }
 
             if (lhs.type == ExprType::Image
@@ -292,8 +290,7 @@ FullType TypeVisitor::binop_type(Token op,
             if (lhs.is_list() and rhs.is_list()) {
                 if (lhs.type == ExprType::Section)
                     return lhs;
-                else
-                    return rhs;
+                return rhs;
             }
             break;
         case ProgramLexer::DIV_T:
@@ -325,11 +322,11 @@ FullType TypeVisitor::binop_type(Token op,
 
 void TypeVisitor::visit(BinOpNode& node)
 {
-    node.lhs.get()->visit(*this);
-    node.rhs.get()->visit(*this);
+    node.lhs->visit(*this);
+    node.rhs->visit(*this);
 
-    auto ltype = node.lhs.get()->ftype;
-    auto rtype = node.rhs.get()->ftype;
+    auto ltype = node.lhs->ftype;
+    auto rtype = node.rhs->ftype;
 
     if (node.token) {
         node.ftype = binop_type(node.token.value(), ltype, rtype);
@@ -363,7 +360,7 @@ void TypeVisitor::visit(IdNode& node)
 void TypeVisitor::visit(ProgramNode& node)
 {
     for (auto& cmd : node.cmds)
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
 }
 
 void TypeVisitor::visit([[maybe_unused]] ScalarNode& node)

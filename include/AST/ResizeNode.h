@@ -14,7 +14,7 @@ class ASTVisitor;
 class ResizeNode : public ExprNode
 {
 public:
-    ResizeNode(Token _t, ResizeType _type, ExprNode _img, ExprNode _resize);
+    ResizeNode(Token _t, ResizeType _type, const ExprNode& _img, const ExprNode& _resize);
     ResizeNode(Token _t, ResizeType _type, expr_ptr _img, expr_ptr _resize);
     void visit(ASTVisitor& visitor);
 

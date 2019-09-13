@@ -1,8 +1,8 @@
 #include "AST/SectionNode.h"
 #include "AST/ASTVisitor.h"
 
-SectionNode::SectionNode(Token::t_type _t, ExprNode _left, ExprNode _upper,
-    ExprNode _right, ExprNode _lower) : ExprNode(_t, ExprType::Section),
+SectionNode::SectionNode(Token::t_type _t, const ExprNode& _left, const ExprNode& _upper,
+    const ExprNode& _right, const ExprNode& _lower) : ExprNode(_t, ExprType::Section),
     left(std::make_unique<ExprNode>(_left)),
     upper(std::make_unique<ExprNode>(_upper)),
     right(std::make_unique<ExprNode>(_right)),

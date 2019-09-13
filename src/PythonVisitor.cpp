@@ -2,49 +2,46 @@
 #include "CompilerExceptions.h"
 #include "ProgramLexer.h"
 
-PythonVisitor::PythonVisitor()  
-{}
-
 void PythonVisitor::visit(CropNode& node)
 {
     if (node.command) {
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << " = ";
     }
     
     output << "_crop(";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ", ";
-    node.section.get()->visit(*this);
+    node.section->visit(*this);
     output << ")";
 }
 
 void PythonVisitor::visit(DimensionsNode& node)
 {
     output << "(";
-    node.width.get()->visit(*this);
+    node.width->visit(*this);
     output << ", ";
-    node.height.get()->visit(*this);
+    node.height->visit(*this);
     output << ")";
 }
 
 void PythonVisitor::visit(ExportNode& node)
 {
     output << "_save(";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ", ";
-    node.path.get()->visit(*this);
+    node.path->visit(*this);
     output << ")";
 }
 
 void PythonVisitor::visit(FlipNode& node)
 {
     if (node.command) {
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << " = ";
     }
 
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ".transpose(Image.";
     if (node.dir == FlipDirection::Horizontal)
         output << "FLIP_LEFT_RIGHT)";
@@ -58,7 +55,7 @@ void PythonVisitor::visit(ForNode& node)
 
     output << "for ";
 
-    node.iterator.get()->visit(*this);
+    node.iterator->visit(*this);
 
     // std::string iter_name = "_i";
     // iter_name += std::to_string(indent);
@@ -67,26 +64,26 @@ void PythonVisitor::visit(ForNode& node)
     output << " in ";
     if (node.recursive) {
         output << "_chain(*[_f for _, _, _f in _walk(";
-        node.path.get()->visit(*this);
+        node.path->visit(*this);
         output << ")]):";
     } else {
         output << "filter(_isfile, (";
-        node.path.get()->visit(*this);
+        node.path->visit(*this);
         output << "/_f for _f in _listdir(";
-        node.path.get()->visit(*this);
+        node.path->visit(*this);
         output << "))):";
     }
     output << std::endl;
 
     // for (auto i = 0; i < indent; ++i)
     //     output << "     ";
-    // node.iterator.get()->visit(*this);
+    // node.iterator->visit(*this);
     // output << " = " << iter_name;
 
     for (auto& cmd : node.cmds) {
         for (auto i = 0; i < indent; ++i)
             output << "    ";
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
         output << "\n";
     }
 
@@ -96,41 +93,41 @@ void PythonVisitor::visit(ForNode& node)
 void PythonVisitor::visit(ImportNode& node)
 {
     output << "Image.open(";
-    node.path.get()->visit(*this);
+    node.path->visit(*this);
     output << ").convert(\"RGBA\")";
 }
 
 void PythonVisitor::visit(ModifyNode& node)
 {
     if (node.command) {
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << " = ";
     }
 
     output << "ImageEnhance." << node.mod_name() << "(";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ").enhance(";
-    node.factor.get()->visit(*this);
+    node.factor->visit(*this);
     output << ")";
 }
 
 void PythonVisitor::visit(ResizeNode& node)
 {
     if (node.command) {
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << " = ";
     }
 
     output << "_resize(";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ", ";
     if (node.resize_type == ResizeType::Absolute) {
-        node.resize.get()->visit(*this);
+        node.resize->visit(*this);
     } else {
         output << "tuple(";
-        node.resize.get()->visit(*this);
+        node.resize->visit(*this);
         output << " * dim for dim in ";
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << ".size)";
     }
     output << ")";
@@ -139,26 +136,26 @@ void PythonVisitor::visit(ResizeNode& node)
 void PythonVisitor::visit(RotateNode& node)
 {
     if (node.command) {
-        node.image.get()->visit(*this);
+        node.image->visit(*this);
         output << " = ";
     }
 
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     output << ".rotate(";
-    node.rotation.get()->visit(*this);
+    node.rotation->visit(*this);
     output << ")";
 }
 
 void PythonVisitor::visit(SectionNode& node)
 {
     output << "(";
-    node.left.get()->visit(*this);
+    node.left->visit(*this);
     output << ", ";
-    node.upper.get()->visit(*this);
+    node.upper->visit(*this);
     output << ", ";
-    node.right.get()->visit(*this);
+    node.right->visit(*this);
     output << ", ";
-    node.lower.get()->visit(*this);
+    node.lower->visit(*this);
     output << ")";
 }
 
@@ -168,12 +165,12 @@ void PythonVisitor::visit(UnOpNode& node)
         auto op = node.token.value();
         if (op.type == ProgramLexer::UNMINUS_T) {
             output << op.text;
-            node.expr.get()->visit(*this);
+            node.expr->visit(*this);
         } else if (op.type == ProgramLexer::DIMENSIONS_T) {
-            node.expr.get()->visit(*this);
+            node.expr->visit(*this);
             output << ".size";
         } else if (ProgramLexer::channel_token(op.type)) {
-            node.expr.get()->visit(*this);
+            node.expr->visit(*this);
             output << ".getchannel('" << op.text << "')";
         } else {
             throw CompilerException("Unary operation at "
@@ -187,19 +184,19 @@ void PythonVisitor::visit(UnOpNode& node)
 
 void PythonVisitor::visit(AssignNode& node)
 {
-    node.id.get()->visit(*this);
+    node.id->visit(*this);
     output << " = ";
-    node.expr.get()->visit(*this);
+    node.expr->visit(*this);
 }
 
 void PythonVisitor::visit(PrintNode& node)
 {
-    if (node.expr.get()->ftype.type == ExprType::Image) {
-        node.expr.get()->visit(*this);
+    if (node.expr->ftype.type == ExprType::Image) {
+        node.expr->visit(*this);
         output << ".show()";
     } else {
         output << "print(";
-        node.expr.get()->visit(*this);
+        node.expr->visit(*this);
         output << ")";
     }
 }
@@ -210,8 +207,8 @@ void PythonVisitor::visit(BinOpNode& node)
         throw CompilerException("Binary operation"\
             " has no defining token\n");
 
-    auto lhs = node.lhs.get()->ftype;
-    auto rhs = node.rhs.get()->ftype;
+    auto lhs = node.lhs->ftype;
+    auto rhs = node.rhs->ftype;
     std::optional<std::string> func_call;
     std::optional<std::string> operation;
     bool invert = false;
@@ -230,33 +227,33 @@ void PythonVisitor::visit(BinOpNode& node)
             } else if (lhs.type == rhs.type
                 and lhs.is_list()) {
                 output << "tuple(_a+_b for _a,_b in zip(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ",";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << "))";
             } else if (lhs.is_list() and rhs.is_num()) {
                 output << "tuple(";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << " + _c for _c in ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ")";
             } else if (rhs.is_list() and lhs.is_num()) {
                 output << "tuple(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << " + _c for _c in ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (lhs.type == ExprType::Image
                 and rhs.is_num()) {
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ".point(lambda i: i + ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (rhs.type == ExprType::Image
                 and lhs.is_num()) {
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ".point(lambda i: i + ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ")";
             } else {
                 invalid = true;
@@ -271,23 +268,23 @@ void PythonVisitor::visit(BinOpNode& node)
             } else if (lhs.type == ExprType::Image
                 and rhs.type == ExprType::Section) {
                 output << "_rm_sec(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ", ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (rhs.type == ExprType::Image
                 and lhs.type == ExprType::Section) {
                 output << "_rm_sec(";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ", ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ", reverse=True)";
             } else if (lhs.type == rhs.type
                 and lhs.is_list()) {
                 output << "tuple(abs(_a-_b) for _a,_b in zip(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ",";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << "))";
             } else {
                 invalid = true;
@@ -301,34 +298,34 @@ void PythonVisitor::visit(BinOpNode& node)
                 operation = "*";
             } else if (lhs.type == ExprType::Image
                 and rhs.is_num()) {
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ".point(lambda i: i * ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (rhs.type == ExprType::Image
                 and lhs.is_num()) {
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ".point(lambda i: i * ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ")";
             } else if (lhs.is_list() and rhs.is_num()) {
                 output << "tuple(";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << " * _c for _c in ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ")";
             } else if (rhs.is_list() and lhs.is_num()) {
                 output << "tuple(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << " * _c for _c in ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (lhs.type == rhs.type
                 and lhs.is_list()) {
                 output << "tuple(_a*_b for _a,_b in zip(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ",";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << "))";
             } else if (lhs.type == ExprType::Section
                 and rhs.type == ExprType::Dimensions) {
@@ -352,22 +349,22 @@ void PythonVisitor::visit(BinOpNode& node)
                 func_call = "_path_div";
             } else if (lhs.type == ExprType::Image
                 and rhs.is_num()) {
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ".point(lambda i: i / ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << ")";
             } else if (lhs.is_list() and rhs.is_num()) {
                 output << "tuple(_c / ";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << " for _c in ";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ")";
             } else if (lhs.type == rhs.type
                 and lhs.is_list()) {
                 output << "tuple(_a/_b for _a,_b in zip(";
-                node.lhs.get()->visit(*this);
+                node.lhs->visit(*this);
                 output << ",";
-                node.rhs.get()->visit(*this);
+                node.rhs->visit(*this);
                 output << "))";
             } else {
                 invalid = true;
@@ -389,20 +386,20 @@ void PythonVisitor::visit(BinOpNode& node)
     if (func_call) {
         output << func_call.value() << "(";
         if (not invert) {
-            node.lhs.get()->visit(*this);
+            node.lhs->visit(*this);
             output << ", ";
-            node.rhs.get()->visit(*this);
+            node.rhs->visit(*this);
         } else {
-            node.rhs.get()->visit(*this);
+            node.rhs->visit(*this);
             output << ", ";
-            node.lhs.get()->visit(*this);
+            node.lhs->visit(*this);
         }
         output << ")";
     } else if (operation) {
         output << "(";
-        node.lhs.get()->visit(*this);
+        node.lhs->visit(*this);
         output << " " << operation.value() << " ";
-        node.rhs.get()->visit(*this);
+        node.rhs->visit(*this);
         output << ")";
     }
 }
@@ -420,7 +417,7 @@ void PythonVisitor::visit(ProgramNode& node)
 {
     output << prog_header;
     for (auto& cmd : node.cmds) {
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
         output << std::endl;
     }
 }

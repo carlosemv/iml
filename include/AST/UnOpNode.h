@@ -8,7 +8,7 @@ class ASTVisitor;
 class UnOpNode : public ExprNode
 {
 public:
-    UnOpNode(Token op_tok, ExprNode _expr);
+    UnOpNode(Token op_tok, const ExprNode& _expr);
     UnOpNode(Token op_tok, std::unique_ptr<ExprNode> _expr);
 
     void visit(ASTVisitor& visitor);

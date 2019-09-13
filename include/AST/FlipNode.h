@@ -14,7 +14,7 @@ class ASTVisitor;
 class FlipNode : public ExprNode
 {
 public:
-    FlipNode(Token _t, FlipDirection _dir, ExprNode _img);
+    FlipNode(Token _t, FlipDirection _dir, const ExprNode& _img);
     FlipNode(Token _t, FlipDirection _dir, expr_ptr _img);
     void visit(ASTVisitor& visitor);
 

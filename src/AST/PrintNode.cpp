@@ -1,12 +1,14 @@
 #include "AST/PrintNode.h"
-#include "AST/ASTVisitor.h"
 
-PrintNode::PrintNode(Token _t, ExprNode _expr) :
-    CommandNode(_t), expr(std::make_unique<ExprNode>(_expr))
+#include "AST/ASTVisitor.h"
+#include <utility>
+
+PrintNode::PrintNode(Token _t, const ExprNode& _expr) :
+    CommandNode(std::move(_t)), expr(std::make_unique<ExprNode>(_expr))
 {}
 
 PrintNode::PrintNode(Token _t, std::unique_ptr<ExprNode> _expr) :
-    CommandNode(_t), expr(std::move(_expr))
+    CommandNode(std::move(_t)), expr(std::move(_expr))
 {}
 
 

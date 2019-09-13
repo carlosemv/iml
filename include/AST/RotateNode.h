@@ -8,7 +8,7 @@ class ASTVisitor;
 class RotateNode : public ExprNode
 {
 public:
-    RotateNode(Token _t, ExprNode _img, ExprNode _rot);
+    RotateNode(Token _t, const ExprNode& _img, const ExprNode& _rot);
     RotateNode(Token _t, expr_ptr _img, expr_ptr _rot);
     void visit(ASTVisitor& visitor);
 

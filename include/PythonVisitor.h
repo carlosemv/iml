@@ -10,7 +10,7 @@ class PythonVisitor : public ASTVisitor
 public:
     std::ostringstream output;
 
-    PythonVisitor();
+    PythonVisitor() = default;
 
     void visit(AssignNode& node);
     void visit(BinOpNode& node);

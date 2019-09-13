@@ -25,8 +25,8 @@ namespace IO {
         out << output;
     }
 
-    void write_file(std::string filename, std::ostringstream& output)
+    void write_file(const std::string& filename, std::ostringstream& output)
     {
-        write_file(std::move(filename), output.str());
+        write_file(filename, output.str());
     }
-}
+} // namespace IO

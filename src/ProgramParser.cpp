@@ -250,7 +250,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
     if (not match(ProgramLexer::LPAREN_T))
         throw_unexpected(ProgramLexer::LPAREN_T);
 
-    std::unique_ptr<ExprNode> components[4];
+    std::array<std::unique_ptr<ExprNode>, 4> components;
 
     components[0] = expression();
     if (not match(ProgramLexer::SEP_T))
@@ -407,13 +407,12 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
     return nullptr;
 }
 
-void ProgramParser::throw_unexpected(std::string expected)
+void ProgramParser::throw_unexpected(const std::string& expected)
 {
-    auto err = error_msg(std::move(expected), curr_token);
+    auto err = error_msg(expected, curr_token);
     if (curr_token.type == Token::INVALID_T)
         throw LexicalException(err);
-    else
-        throw SyntacticException(err);
+    throw SyntacticException(err);
 }
 
 void ProgramParser::throw_unexpected(Token::t_type expected)
@@ -422,6 +421,5 @@ void ProgramParser::throw_unexpected(Token::t_type expected)
     auto err = error_msg(expect_name, curr_token);
     if (curr_token.type == Token::INVALID_T)
         throw LexicalException(err);
-    else
-        throw SyntacticException(err);
+    throw SyntacticException(err);
 }

@@ -7,7 +7,7 @@
 namespace IO {
     std::string read_file(const std::string& filename);
     void write_file(const std::string& filename, const std::string& output);
-    void write_file(std::string filename, std::ostringstream& output);
-}
+    void write_file(const std::string& filename, std::ostringstream& output);
+} // namespace IO
 
 #endif

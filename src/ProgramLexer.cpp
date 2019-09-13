@@ -159,8 +159,7 @@ Token ProgramLexer::id_or_keyword()
     auto t = text_from(p);
     if (keywords.find(t) != keywords.end())
         return Token(keywords[t], t, l, c);
-    else
-        return Token(ID_T, t, l, c);
+    return Token(ID_T, t, l, c);
 }
 
 Token ProgramLexer::path()
@@ -182,7 +181,6 @@ Token ProgramLexer::path()
 
     if (not match('"'))
         return Token(Token::INVALID_T, t, l, c);
-
     return Token(PATH_T, t, l, c);
 }
 
@@ -197,10 +195,7 @@ Token ProgramLexer::number()
     while (match(std::bind(&ProgramLexer::is_digit, this))) {}
 
     auto t = text_from(p);
-    if (is_float)
-        return Token(FLOAT_T, t, l, c);
-    else
-        return Token(INTEGER_T, t, l, c);
+    return Token(is_float? FLOAT_T : INTEGER_T, t, l, c);
 }
 
 std::optional<Token::t_type> ProgramLexer::char_type()

@@ -1,7 +1,9 @@
 #include "AST/IdNode.h"
-#include "AST/ASTVisitor.h"
 
-IdNode::IdNode(Token _t) : ExprNode(_t, ExprType::Id)
+#include "AST/ASTVisitor.h"
+#include <utility>
+
+IdNode::IdNode(Token _t) : ExprNode(std::move(_t), ExprType::Id)
 {}
 
 void IdNode::visit(ASTVisitor& visitor)

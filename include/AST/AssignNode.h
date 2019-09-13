@@ -9,8 +9,8 @@ class ASTVisitor;
 class AssignNode : public CommandNode
 {
 public:
-    AssignNode(Token _t, IdNode _id, ExprNode _expr);
-    AssignNode(Token _t, IdNode _id, 
+    AssignNode(Token _t, const IdNode& _id, const ExprNode& _expr);
+    AssignNode(Token _t, const IdNode& _id, 
         std::unique_ptr<ExprNode> _expr);
     void visit(ASTVisitor& visitor);
 

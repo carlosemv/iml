@@ -8,7 +8,7 @@ class ASTVisitor;
 class CropNode : public ExprNode
 {
 public:
-    CropNode(Token _t, ExprNode _section, ExprNode _img);
+    CropNode(Token _t, const ExprNode& _section, const ExprNode& _img);
     CropNode(Token _t, expr_ptr _section, expr_ptr _img);
     void visit(ASTVisitor& visitor);
 

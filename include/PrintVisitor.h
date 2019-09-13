@@ -7,7 +7,7 @@
 class PrintVisitor : public ASTVisitor
 {
 public:
-    PrintVisitor();
+    PrintVisitor() = default;
 
     void visit(AssignNode& node);
     void visit(BinOpNode& node);

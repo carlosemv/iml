@@ -1,10 +1,12 @@
 #include "AST/ForNode.h"
-#include "AST/ASTVisitor.h"
 
-ForNode::ForNode(Token _t, bool _rec, IdNode _id,
+#include "AST/ASTVisitor.h"
+#include <utility>
+
+ForNode::ForNode(Token _t, bool _rec, const IdNode& _id,
     std::unique_ptr<ExprNode> _path,
     std::vector<std::unique_ptr<CommandNode>> _cmds) :
-    ProgramNode(_t, std::move(_cmds)),
+    ProgramNode(std::move(_t), std::move(_cmds)),
     recursive(_rec), iterator(std::make_unique<IdNode>(_id)),
     path(std::move(_path))
 {}

@@ -8,7 +8,7 @@ class ASTVisitor;
 class ImportNode : public ExprNode
 {
 public:
-    ImportNode(Token _t, ExprNode _path);
+    ImportNode(Token _t, const ExprNode& _path);
     ImportNode(Token _t, std::unique_ptr<ExprNode> _path);
     void visit(ASTVisitor& visitor);
 

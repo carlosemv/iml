@@ -61,8 +61,7 @@ Token Parser::peek(unsigned la)
 {
     if (pos + la < input.size())
         return input.at(pos+la);
-    else
-        return input.back();
+    return input.back();
 }
 
 std::string Parser::error_msg(const std::string& expected, const Token& found)

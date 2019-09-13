@@ -19,14 +19,14 @@ enum class ExprType
 
 struct FullType
 {
-    ExprType type;
+    ExprType type{ExprType::Invalid};
     std::vector<FullType> list_types;
 
-    FullType();
+    FullType() = default;
     explicit FullType(ExprType _type);
-    std::string to_string() const;
-    bool is_num() const;
-    bool is_list() const;
+    [[nodiscard]] std::string to_string() const;
+    [[nodiscard]] bool is_num() const;
+    [[nodiscard]] bool is_list() const;
 
     inline friend std::ostream& operator<<(std::ostream& out, const FullType& t)
     {

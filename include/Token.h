@@ -12,9 +12,9 @@ public:
 
     t_type type;
     std::string text;
-    unsigned line, col;
+    unsigned line{0}, col{0};
 
-    Token() : type(INVALID_T), text(""), line(0), col(0) {}
+    Token() : type(INVALID_T), text("") {}
     Token(t_type _type) : type(_type), text(""), line(0), col() {}
     Token(t_type _type, std::string _text, unsigned _line, unsigned _col);
     std::string pos_string();

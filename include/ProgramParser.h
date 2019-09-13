@@ -27,7 +27,7 @@ public:
     ProgramNode parse();
 
 protected:
-    void throw_unexpected(std::string expected);
+    void throw_unexpected(const std::string& expected);
     void throw_unexpected(Token::t_type expected);
 
     static std::optional<Modification> get_modification(const Token& tok);

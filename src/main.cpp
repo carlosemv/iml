@@ -8,9 +8,9 @@
 #include "PythonVisitor.h"
 #include "TypeVisitor.h"
 
-std::optional<ProgramNode> parse(std::string input)
+std::optional<ProgramNode> parse(const std::string& input)
 {
-    ProgramParser pp(std::move(input));
+    ProgramParser pp(input);
     try {
         auto node = pp.parse();
         std::cout << "Successfully parsed\n";

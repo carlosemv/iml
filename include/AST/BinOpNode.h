@@ -8,7 +8,7 @@ class ASTVisitor;
 class BinOpNode : public ExprNode
 {
 public:
-    BinOpNode(ExprNode _lhs, Token op_tok, ExprNode _rhs);
+    BinOpNode(const ExprNode& _lhs, Token op_tok, const ExprNode& _rhs);
     BinOpNode(std::unique_ptr<ExprNode> _lhs, Token op_tok,
         std::unique_ptr<ExprNode> _rhs);
 

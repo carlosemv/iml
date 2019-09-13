@@ -45,7 +45,7 @@ public:
 
 protected:
     template <class T, class N>
-    void cast_visit(N& node, std::string name)
+    void cast_visit(N& node, const std::string& name)
     {
         try {
             visit(dynamic_cast<T&>(node));

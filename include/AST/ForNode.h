@@ -5,11 +5,15 @@
 #include "IdNode.h"
 #include "ProgramNode.h"
 
+#include <vector>
+#include <memory>
+
 class ASTVisitor;
 class ForNode : public ProgramNode
 {
 public:
-    ForNode(Token _t, bool _rec, const IdNode& _id, std::unique_ptr<ExprNode> _path,
+    ForNode(Token _t, bool _rec, const IdNode& _id,
+    	std::unique_ptr<ExprNode> _path,
         std::vector<std::unique_ptr<CommandNode>> _cmds);
     void visit(ASTVisitor& visitor);
 

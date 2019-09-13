@@ -67,7 +67,7 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::DIMS_T, "dimensions"},
         {ProgramLexer::DIMENSIONS_T, "dimensions operator"},
         {ProgramLexer::PROG_T, "program"},
-        //[[[end]]]
+        // [[[end]]]
     };
     m.merge(new_names);
     return m;
@@ -118,7 +118,7 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
     {"contrast", CONTRAST_T},
     {"color", COLOR_T},
     {"dimensions", DIMENSIONS_T},
-    //[[[end]]]
+    // [[[end]]]
 };
 
 bool ProgramLexer::is_letter()
@@ -220,28 +220,28 @@ std::optional<Token::t_type> ProgramLexer::char_type()
                     cog.outl(switch_item.format(symb, tok_id))
         ]]]*/
         case '#':
-        	return COMMENT_T;
+            return COMMENT_T;
         case '=':
-        	return ASSIGN_T;
+            return ASSIGN_T;
         case '(':
-        	return LPAREN_T;
+            return LPAREN_T;
         case ')':
-        	return RPAREN_T;
+            return RPAREN_T;
         case '{':
-        	return LBRACE_T;
+            return LBRACE_T;
         case '}':
-        	return RBRACE_T;
+            return RBRACE_T;
         case ',':
-        	return SEP_T;
+            return SEP_T;
         case '+':
-        	return PLUS_T;
+            return PLUS_T;
         case '-':
-        	return MINUS_T;
+            return MINUS_T;
         case '*':
-        	return MULT_T;
+            return MULT_T;
         case '/':
-        	return DIV_T;
-        //[[[end]]]
+            return DIV_T;
+        // [[[end]]]
         default:
             return std::nullopt;
     }

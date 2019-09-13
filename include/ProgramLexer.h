@@ -74,7 +74,7 @@ public:
     static constexpr Token::t_type DIMENSIONS_T = Lexer::LAST_T + 44;
     static constexpr Token::t_type PROG_T = Lexer::LAST_T + 45;
     static constexpr Token::t_type LAST_T = PROG_T;
-    //[[[end]]]
+    // [[[end]]]
 
     static std::map<Token::t_type, std::string> token_names;
     static std::map<std::string, Token::t_type> keywords;

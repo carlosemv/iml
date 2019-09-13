@@ -5,6 +5,7 @@
 #include <forward_list>
 #include <iostream>
 #include <map>
+#include <string>
 
 class TypeVisitor : public ASTVisitor
 {
@@ -35,8 +36,10 @@ private:
     static void check_image(std::optional<Token> tok, const FullType& type);
     static void check_path(std::optional<Token> tok, const FullType& type);
     static void check_id(std::optional<Token> tok, const FullType& type);
-    static void check_dimensions(std::optional<Token> tok, const FullType& type);
-    static void check_section(std::optional<Token> tok, const FullType& type);
+    static void check_dimensions(std::optional<Token> tok,
+        const FullType& type);
+    static void check_section(std::optional<Token> tok,
+        const FullType& type);
     FullType binop_type(Token op, FullType lhs, FullType rhs);
 };
 

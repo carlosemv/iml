@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
 
 namespace IO {
     std::string read_file(const std::string& filename);

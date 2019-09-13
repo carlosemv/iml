@@ -34,6 +34,6 @@ std::string ModifyNode::mod_name()
 }
 
 void ModifyNode::visit(ASTVisitor& visitor)
-{ 
+{
     visitor.visit(*this);
 }

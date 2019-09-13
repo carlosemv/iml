@@ -8,7 +8,7 @@ void PythonVisitor::visit(CropNode& node)
         node.image->visit(*this);
         output << " = ";
     }
-    
+
     output << "_crop(";
     node.image->visit(*this);
     output << ", ";
@@ -46,7 +46,7 @@ void PythonVisitor::visit(FlipNode& node)
     if (node.dir == FlipDirection::Horizontal)
         output << "FLIP_LEFT_RIGHT)";
     else
-        output << "FLIP_TOP_BOTTOM)"; 
+        output << "FLIP_TOP_BOTTOM)";
 }
 
 void PythonVisitor::visit(ForNode& node)
@@ -437,7 +437,7 @@ void PythonVisitor::visit(ScalarNode& node)
     }
 }
 
-const char* PythonVisitor::prog_header = 
+const char* PythonVisitor::prog_header =
     "#!/usr/bin/env python3\n"
     "from os import walk as _walk\n"
     "from os import listdir as _listdir\n"

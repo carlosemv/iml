@@ -18,6 +18,6 @@ ResizeNode::ResizeNode(Token _t, ResizeType _type,
 {}
 
 void ResizeNode::visit(ASTVisitor& visitor)
-{ 
+{
     visitor.visit(*this);
 }

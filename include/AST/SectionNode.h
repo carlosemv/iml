@@ -9,7 +9,7 @@ class ASTVisitor;
 class SectionNode : public ExprNode
 {
 private:
-    using expr_ptr = std::unique_ptr<ExprNode>;        
+    using expr_ptr = std::unique_ptr<ExprNode>;  
 public:
     SectionNode(Token::t_type _t, const ExprNode& _left, const ExprNode& _upper,
         const ExprNode& _right, const ExprNode& _lower);

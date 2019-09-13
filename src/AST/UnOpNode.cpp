@@ -4,7 +4,7 @@
 #include <utility>
 
 UnOpNode::UnOpNode(Token op_tok, const ExprNode& _expr) :
-    ExprNode(std::move(op_tok), ExprType::Invalid), 
+    ExprNode(std::move(op_tok), ExprType::Invalid),
     expr(std::make_unique<ExprNode>(_expr))
 {}
 

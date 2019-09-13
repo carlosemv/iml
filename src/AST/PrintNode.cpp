@@ -13,6 +13,6 @@ PrintNode::PrintNode(Token _t, std::unique_ptr<ExprNode> _expr) :
 
 
 void PrintNode::visit(ASTVisitor& visitor)
-{ 
+{
     visitor.visit(*this);
 }

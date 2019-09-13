@@ -181,5 +181,5 @@ void PrintVisitor::visit(ScalarNode& node)
         }
     } else {
         throw CompilerException("Scalar node has no token\n");
-    }  
+    }
 }

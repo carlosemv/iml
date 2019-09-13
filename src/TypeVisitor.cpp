@@ -113,7 +113,7 @@ void TypeVisitor::visit(ResizeNode& node)
         check_id(node.image->token,
             node.image->ftype);
     }
-    
+
     node.image->visit(*this);
     check_image(node.image->token,
         node.image->ftype);
@@ -223,7 +223,7 @@ void TypeVisitor::visit(AssignNode& node)
     if (not node.id->token)
         throw CompilerException("Variable has no defining token");
 
-    sym_table.front()[node.id->token.value().text] = 
+    sym_table.front()[node.id->token.value().text] =
         node.id->ftype;
 }
 
@@ -366,7 +366,8 @@ void TypeVisitor::visit(ProgramNode& node)
 void TypeVisitor::visit([[maybe_unused]] ScalarNode& node)
 {}
 
-void TypeVisitor::check_num(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_num(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -381,7 +382,8 @@ void TypeVisitor::check_num(std::optional<Token> tok, const FullType& type)
     }
 }
 
-void TypeVisitor::check_image(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_image(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -396,7 +398,8 @@ void TypeVisitor::check_image(std::optional<Token> tok, const FullType& type)
     }
 }
 
-void TypeVisitor::check_path(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_path(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -411,7 +414,8 @@ void TypeVisitor::check_path(std::optional<Token> tok, const FullType& type)
     }
 }
 
-void TypeVisitor::check_id(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_id(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -426,7 +430,8 @@ void TypeVisitor::check_id(std::optional<Token> tok, const FullType& type)
     }
 }
 
-void TypeVisitor::check_dimensions(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_dimensions(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -441,7 +446,8 @@ void TypeVisitor::check_dimensions(std::optional<Token> tok, const FullType& typ
     }
 }
 
-void TypeVisitor::check_section(std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_section(
+    std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();

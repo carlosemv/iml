@@ -29,7 +29,7 @@ public:
     void visit(ScalarNode& node);
     void visit(SectionNode& node);
     void visit(UnOpNode& node);
-    
+
 private:
     static const char* prog_header;
     int indent{0};

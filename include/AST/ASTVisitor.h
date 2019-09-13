@@ -19,6 +19,8 @@
 #include "SectionNode.h"
 #include "UnOpNode.h"
 
+#include <string>
+
 class ProgramNode;
 class ASTVisitor
 {

@@ -13,7 +13,7 @@ public:
     static constexpr Token::t_type LAST_T = EOF_T;
     static std::map<Token::t_type, std::string> token_names;
 
-    static Token EOF_token(unsigned line=0, unsigned col=0);
+    static Token EOF_token(unsigned line = 0, unsigned col = 0);
 
     virtual Token next_token() = 0;
     virtual std::string token_name(Token::t_type type) = 0;

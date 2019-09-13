@@ -24,7 +24,8 @@ ProgramParser::ProgramParser(const std::string& _in) :
     Parser(std::make_unique<ProgramLexer>(_in))
 {}
 
-std::optional<std::function<std::unique_ptr<CommandNode>()>> ProgramParser::get_command()
+std::optional<std::function<std::unique_ptr<CommandNode>()>>
+    ProgramParser::get_command()
 {
     while (match(ProgramLexer::COMMENT_T)) {}
 
@@ -127,7 +128,7 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
 
     Token id_tok = curr_token;
     if (not match(ProgramLexer::ID_T))
-        throw_unexpected(ProgramLexer::ID_T);    
+        throw_unexpected(ProgramLexer::ID_T);
     IdNode iterator(id_tok);
 
     if (not match(ProgramLexer::IN_T))

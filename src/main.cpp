@@ -25,7 +25,7 @@ std::optional<ProgramNode> parse(const std::string& input)
         std::cerr << "[Compiler Exception] ";
         std::cerr << e.what() << std::endl;
     }
-    return std::nullopt;    
+    return std::nullopt;
 }
 
 bool generate(ProgramNode& root, const std::string& out_file)

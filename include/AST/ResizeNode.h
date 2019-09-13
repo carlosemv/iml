@@ -1,8 +1,8 @@
 #ifndef __RESIZE_NODE_H__
 #define __RESIZE_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 enum class ResizeType
 {

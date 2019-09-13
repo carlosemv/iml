@@ -1,8 +1,8 @@
 #ifndef __CROP_NODE_H__
 #define __CROP_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class CropNode : public ExprNode

@@ -1,8 +1,8 @@
 #ifndef __IMPORT_NODE_H__
 #define __IMPORT_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class ImportNode : public ExprNode

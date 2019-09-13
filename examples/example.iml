@@ -8,6 +8,8 @@ circle = image in "circle.png"
 
 rect = (0.33, 0.33, 0.66, 0.66) * (1080, 610)
 cut = img - rect
+print cut
+
 # print img - cut
 
 # flip cut vertically

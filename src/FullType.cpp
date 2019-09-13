@@ -6,10 +6,6 @@ FullType::FullType() : type(ExprType::Invalid)
 FullType::FullType(ExprType _type) : type(_type)
 {}
 
-FullType::FullType(const FullType& _ftype) : type(_ftype.type),
-    list_types(_ftype.list_types)
-{}
-
 std::string FullType::to_string() const
 {
     std::ostringstream out;

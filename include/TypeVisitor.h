@@ -1,10 +1,10 @@
 #ifndef __TYPE_VISITOR_H__
 #define __TYPE_VISITOR_H__
 
-#include <iostream>
-#include <forward_list>
-#include <map>
 #include "AST/ASTVisitor.h"
+#include <forward_list>
+#include <iostream>
+#include <map>
 
 class TypeVisitor : public ASTVisitor
 {
@@ -31,12 +31,12 @@ public:
 
 private:
     std::forward_list<std::map<std::string, FullType>> sym_table;
-    static void check_num(std::optional<Token> tok, FullType type);
-    static void check_image(std::optional<Token> tok, FullType type);
-    static void check_path(std::optional<Token> tok, FullType type);
-    static void check_id(std::optional<Token> tok, FullType type);
-    static void check_dimensions(std::optional<Token> tok, FullType type);
-    static void check_section(std::optional<Token> tok, FullType type);
+    static void check_num(std::optional<Token> tok, const FullType& type);
+    static void check_image(std::optional<Token> tok, const FullType& type);
+    static void check_path(std::optional<Token> tok, const FullType& type);
+    static void check_id(std::optional<Token> tok, const FullType& type);
+    static void check_dimensions(std::optional<Token> tok, const FullType& type);
+    static void check_section(std::optional<Token> tok, const FullType& type);
     FullType binop_type(Token op, FullType lhs, FullType rhs);
 };
 

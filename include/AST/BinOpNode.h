@@ -1,8 +1,8 @@
 #ifndef __BIN_OP_NODE_H__
 #define __BIN_OP_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class BinOpNode : public ExprNode

@@ -1,6 +1,6 @@
 #include "TypeVisitor.h"
-#include "ProgramLexer.h"
 #include "CompilerExceptions.h"
+#include "ProgramLexer.h"
 
 TypeVisitor::TypeVisitor() : sym_table(1)
 {}
@@ -366,10 +366,10 @@ void TypeVisitor::visit(ProgramNode& node)
         cmd.get()->visit(*this);
 }
 
-void TypeVisitor::visit(ScalarNode& node)
+void TypeVisitor::visit([[maybe_unused]] ScalarNode& node)
 {}
 
-void TypeVisitor::check_num(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_num(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -384,7 +384,7 @@ void TypeVisitor::check_num(std::optional<Token> tok, FullType type)
     }
 }
 
-void TypeVisitor::check_image(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_image(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -399,7 +399,7 @@ void TypeVisitor::check_image(std::optional<Token> tok, FullType type)
     }
 }
 
-void TypeVisitor::check_path(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_path(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -414,7 +414,7 @@ void TypeVisitor::check_path(std::optional<Token> tok, FullType type)
     }
 }
 
-void TypeVisitor::check_id(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_id(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -429,7 +429,7 @@ void TypeVisitor::check_id(std::optional<Token> tok, FullType type)
     }
 }
 
-void TypeVisitor::check_dimensions(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_dimensions(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();
@@ -444,7 +444,7 @@ void TypeVisitor::check_dimensions(std::optional<Token> tok, FullType type)
     }
 }
 
-void TypeVisitor::check_section(std::optional<Token> tok, FullType type)
+void TypeVisitor::check_section(std::optional<Token> tok, const FullType& type)
 {
     if (tok) {
         auto op = tok.value();

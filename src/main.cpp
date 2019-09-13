@@ -1,15 +1,16 @@
 #include <optional>
+#include <utility>
 
-#include "IO.h"
-#include "CompilerExceptions.h"
-#include "ProgramParser.h"
 #include "AST/ProgramNode.h"
-#include "TypeVisitor.h"
+#include "CompilerExceptions.h"
+#include "IO.h"
+#include "ProgramParser.h"
 #include "PythonVisitor.h"
+#include "TypeVisitor.h"
 
 std::optional<ProgramNode> parse(std::string input)
 {
-    ProgramParser pp(input);
+    ProgramParser pp(std::move(input));
     try {
         auto node = pp.parse();
         std::cout << "Successfully parsed\n";
@@ -27,7 +28,7 @@ std::optional<ProgramNode> parse(std::string input)
     return std::nullopt;    
 }
 
-bool generate(ProgramNode& root, std::string out_file)
+bool generate(ProgramNode& root, const std::string& out_file)
 {
     TypeVisitor tv;
     PythonVisitor pv;

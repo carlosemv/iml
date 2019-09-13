@@ -1,15 +1,14 @@
 #ifndef __LEXER_H__
 #define __LEXER_H__
 
-#include <string>
+#include "Token.h"
 #include <functional>
 #include <map>
-#include "Token.h"
+#include <string>
 
 class Lexer
 {
 public:
-    // static constexpr char EOF = char_traits<char>::eof();
     static constexpr Token::t_type EOF_T = 0;
     static constexpr Token::t_type LAST_T = EOF_T;
     static std::map<Token::t_type, std::string> token_names;
@@ -18,6 +17,7 @@ public:
 
     virtual Token next_token() = 0;
     virtual std::string token_name(Token::t_type type) = 0;
+    virtual ~Lexer() = default;
 
 protected:
     std::string input;
@@ -28,8 +28,8 @@ protected:
     explicit Lexer(std::string _in);
     void skip();
     bool match(char x);
-    bool match(std::function<bool()> predicate);
-    std::string text_from(unsigned pos_begin) const;
+    bool match(const std::function<bool()>& predicate);
+    [[nodiscard]] std::string text_from(unsigned pos_begin) const;
 };
 
 #endif

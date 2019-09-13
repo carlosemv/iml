@@ -1,10 +1,11 @@
 #ifndef __PROGRAM_LEXER_H__
 #define __PROGRAM_LEXER_H__
 
-#include <optional>
-#include <map>
-#include <string>
 #include "Lexer.h"
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
 
 class ProgramLexer : public Lexer
 {
@@ -78,7 +79,7 @@ public:
     static std::map<Token::t_type, std::string> token_names;
     static std::map<std::string, Token::t_type> keywords;
 
-    explicit ProgramLexer(std::string _in) : Lexer(_in) {}
+    explicit ProgramLexer(std::string _in) : Lexer(std::move(_in)) {}
 
     Token next_token();
     std::string token_name(Token::t_type type);

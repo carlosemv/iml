@@ -1,8 +1,8 @@
 #ifndef __ROTATE_NODE_H__
 #define __ROTATE_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class RotateNode : public ExprNode

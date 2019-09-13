@@ -24,7 +24,6 @@ struct FullType
 
     FullType();
     FullType(ExprType _type);
-    FullType(const FullType& _ftype);
     std::string to_string() const;
     bool is_num() const;
     bool is_list() const;

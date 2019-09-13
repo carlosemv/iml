@@ -1,8 +1,8 @@
 #ifndef __UN_OP_NODE_H__
 #define __UN_OP_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class UnOpNode : public ExprNode

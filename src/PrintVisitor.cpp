@@ -1,39 +1,39 @@
 #include "PrintVisitor.h"
-#include "ProgramLexer.h"
 #include "CompilerExceptions.h"
+#include "ProgramLexer.h"
 
-PrintVisitor::PrintVisitor() : indent(0)
+PrintVisitor::PrintVisitor()  
 {}
 
 void PrintVisitor::visit(CropNode& node)
 {
     std::cout << "crop ";
-    node.section.get()->visit(*this);
+    node.section->visit(*this);
     std::cout << " from ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
 }
 
 void PrintVisitor::visit(DimensionsNode& node)
 {
     std::cout << "(";
-    node.width.get()->visit(*this);
+    node.width->visit(*this);
     std::cout << ", ";
-    node.height.get()->visit(*this);
+    node.height->visit(*this);
     std::cout << ")";
 }
 
 void PrintVisitor::visit(ExportNode& node)
 {
     std::cout << "save ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     std::cout << " as ";
-    node.path.get()->visit(*this);
+    node.path->visit(*this);
 }
 
 void PrintVisitor::visit(FlipNode& node)
 {
     std::cout << "flip ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     if (node.dir == FlipDirection::Vertical)
         std::cout << " vertically";
     else
@@ -47,15 +47,15 @@ void PrintVisitor::visit(ForNode& node)
     std::cout << "for ";
     if (node.recursive)
         std::cout << "all ";
-    node.iterator.get()->visit(*this);
+    node.iterator->visit(*this);
     std::cout << " in ";
-    node.path.get()->visit(*this);
+    node.path->visit(*this);
 
     std::cout << " {" << std::endl;
     for (auto& cmd : node.cmds) {
         for (auto i = 0; i < indent; ++i)
             std::cout << "    ";
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
         std::cout << std::endl;
     }
     for (auto i = 0; i < indent-1; ++i)
@@ -68,46 +68,46 @@ void PrintVisitor::visit(ForNode& node)
 void PrintVisitor::visit(ImportNode& node)
 {
     std::cout << "image in ";
-    node.path.get()->visit(*this);
+    node.path->visit(*this);
 }
 
 void PrintVisitor::visit(ModifyNode& node)
 {
     std::cout << "modify ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     std::cout << " " << node.mod_name() << " by ";
-    node.factor.get()->visit(*this);
+    node.factor->visit(*this);
 }
 
 void PrintVisitor::visit(ResizeNode& node)
 {
     std::cout << "resize ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     if (node.resize_type == ResizeType::Absolute)
         std::cout << " to ";
     else
         std::cout << " by ";
-    node.resize.get()->visit(*this);
+    node.resize->visit(*this);
 }
 
 void PrintVisitor::visit(RotateNode& node)
 {
     std::cout << "rotate ";
-    node.image.get()->visit(*this);
+    node.image->visit(*this);
     std::cout << " by ";
-    node.rotation.get()->visit(*this);
+    node.rotation->visit(*this);
 }
 
 void PrintVisitor::visit(SectionNode& node)
 {
     std::cout << "(";
-    node.left.get()->visit(*this);
+    node.left->visit(*this);
     std::cout << ", ";
-    node.upper.get()->visit(*this);
+    node.upper->visit(*this);
     std::cout << ", ";
-    node.right.get()->visit(*this);
+    node.right->visit(*this);
     std::cout << ", ";
-    node.lower.get()->visit(*this);
+    node.lower->visit(*this);
     std::cout << ")";
 }
 
@@ -117,9 +117,9 @@ void PrintVisitor::visit(UnOpNode& node)
         auto type = node.token.value().type;
         if (type == ProgramLexer::UNMINUS_T) {
             std::cout << node.token.value().text;
-            node.expr.get()->visit(*this);
+            node.expr->visit(*this);
         } else {
-            node.expr.get()->visit(*this);
+            node.expr->visit(*this);
             std::cout << "(" << node.token.value().text << ")";
         }
     } else {
@@ -130,20 +130,20 @@ void PrintVisitor::visit(UnOpNode& node)
 
 void PrintVisitor::visit(AssignNode& node)
 {
-    node.id.get()->visit(*this);
+    node.id->visit(*this);
     std::cout << " = ";
-    node.expr.get()->visit(*this);
+    node.expr->visit(*this);
 }
 
 void PrintVisitor::visit(PrintNode& node)
 {
     std::cout << "print ";
-    node.expr.get()->visit(*this);
+    node.expr->visit(*this);
 }
 
 void PrintVisitor::visit(BinOpNode& node)
 {
-    node.lhs.get()->visit(*this);
+    node.lhs->visit(*this);
     if (node.token) {
         std::cout << " ";
         std::cout << node.token.value().text;
@@ -152,7 +152,7 @@ void PrintVisitor::visit(BinOpNode& node)
         throw CompilerException("Binary operation"\
             " has no defining token\n");
     }
-    node.rhs.get()->visit(*this);
+    node.rhs->visit(*this);
 }
 
 void PrintVisitor::visit(IdNode& node)
@@ -167,7 +167,7 @@ void PrintVisitor::visit(IdNode& node)
 void PrintVisitor::visit(ProgramNode& node)
 {
     for (auto& cmd : node.cmds) {
-        cmd.get()->visit(*this);
+        cmd->visit(*this);
         std::cout << std::endl;
     }
 }

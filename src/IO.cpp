@@ -1,9 +1,10 @@
 #include "IO.h"
 #include <iostream>
+#include <utility>
 
 namespace IO {
 
-    std::string read_file(std::string filename)
+    std::string read_file(const std::string& filename)
     {
         std::ifstream in(filename, std::ios::in);
         try {
@@ -18,7 +19,7 @@ namespace IO {
         return sstr.str();
     }
 
-    void write_file(std::string filename, std::string output)
+    void write_file(const std::string& filename, const std::string& output)
     {
         std::ofstream out(filename, std::ios::out);
         out << output;
@@ -26,6 +27,6 @@ namespace IO {
 
     void write_file(std::string filename, std::ostringstream& output)
     {
-        write_file(filename, output.str());
+        write_file(std::move(filename), output.str());
     }
 }

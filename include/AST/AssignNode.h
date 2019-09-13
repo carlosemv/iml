@@ -1,9 +1,9 @@
 #ifndef __ASSIGN_NODE_H__
 #define __ASSIGN_NODE_H__
 
-#include <memory>
-#include "IdNode.h"
 #include "CommandNode.h"
+#include "IdNode.h"
+#include <memory>
 
 class ASTVisitor;
 class AssignNode : public CommandNode

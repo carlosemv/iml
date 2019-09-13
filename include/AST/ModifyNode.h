@@ -1,8 +1,8 @@
 #ifndef __MODIFY_NODE_H__
 #define __MODIFY_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 enum class Modification
 {

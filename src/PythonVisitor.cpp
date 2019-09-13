@@ -1,8 +1,8 @@
 #include "PythonVisitor.h"
-#include "ProgramLexer.h"
 #include "CompilerExceptions.h"
+#include "ProgramLexer.h"
 
-PythonVisitor::PythonVisitor() : indent(0)
+PythonVisitor::PythonVisitor()  
 {}
 
 void PythonVisitor::visit(CropNode& node)

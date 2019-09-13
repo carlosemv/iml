@@ -1,9 +1,9 @@
 #ifndef __PRINT_NODE_H__
 #define __PRINT_NODE_H__
 
-#include <memory>
 #include "CommandNode.h"
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class PrintNode : public CommandNode

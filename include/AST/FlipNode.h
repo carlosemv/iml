@@ -1,8 +1,8 @@
 #ifndef __FLIP_NODE_H__
 #define __FLIP_NODE_H__
 
-#include <memory>
 #include "ExprNode.h"
+#include <memory>
 
 enum class FlipDirection
 {

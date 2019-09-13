@@ -1,9 +1,9 @@
 #ifndef __EXPORT_NODE_H__
 #define __EXPORT_NODE_H__
 
-#include <memory>
 #include "CommandNode.h"
 #include "ExprNode.h"
+#include <memory>
 
 class ASTVisitor;
 class ExportNode : public CommandNode

@@ -1,24 +1,26 @@
 #include "ProgramParser.h"
+
 #include "CompilerExceptions.h"
+#include <utility>
 
 #include "AST/BinOpNode.h"
-#include "AST/UnOpNode.h"
-#include "AST/ScalarNode.h"
+#include "AST/CropNode.h"
 #include "AST/DimensionsNode.h"
-#include "AST/SectionNode.h"
+#include "AST/FlipNode.h"
 #include "AST/IdNode.h"
 #include "AST/ImportNode.h"
-#include "AST/FlipNode.h"
 #include "AST/ResizeNode.h"
-#include "AST/CropNode.h"
 #include "AST/RotateNode.h"
+#include "AST/ScalarNode.h"
+#include "AST/SectionNode.h"
+#include "AST/UnOpNode.h"
 
 ProgramParser::ProgramParser(std::unique_ptr<Lexer> _lex) :
     Parser(std::move(_lex))
 {}
 
 
-ProgramParser::ProgramParser(std::string _in) :
+ProgramParser::ProgramParser(const std::string& _in) :
     Parser(std::make_unique<ProgramLexer>(_in))
 {}
 
@@ -226,7 +228,7 @@ std::unique_ptr<ExprNode> ProgramParser::img_expr()
     return nullptr;
 }
 
-std::optional<Modification> ProgramParser::get_modification(Token tok)
+std::optional<Modification> ProgramParser::get_modification(const Token& tok)
 {
     switch (tok.type)
     {
@@ -407,7 +409,7 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
 
 void ProgramParser::throw_unexpected(std::string expected)
 {
-    auto err = error_msg(expected, curr_token);
+    auto err = error_msg(std::move(expected), curr_token);
     if (curr_token.type == Token::INVALID_T)
         throw LexicalException(err);
     else

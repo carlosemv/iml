@@ -1,23 +1,23 @@
 #ifndef __AST_VISITOR_H__
 #define __AST_VISITOR_H__
 
-#include "ProgramNode.h"
 #include "AssignNode.h"
-#include "PrintNode.h"
 #include "BinOpNode.h"
-#include "IdNode.h"
-#include "ScalarNode.h"
 #include "CropNode.h"
 #include "DimensionsNode.h"
 #include "ExportNode.h"
 #include "FlipNode.h"
 #include "ForNode.h"
+#include "IdNode.h"
 #include "ImportNode.h"
+#include "ModifyNode.h"
+#include "PrintNode.h"
+#include "ProgramNode.h"
 #include "ResizeNode.h"
 #include "RotateNode.h"
+#include "ScalarNode.h"
 #include "SectionNode.h"
 #include "UnOpNode.h"
-#include "ModifyNode.h"
 
 class ProgramNode;
 class ASTVisitor

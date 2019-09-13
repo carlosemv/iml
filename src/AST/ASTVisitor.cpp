@@ -1,6 +1,6 @@
 #include "AST/ASTVisitor.h"
-#include "ProgramLexer.h"
 #include "CompilerExceptions.h"
+#include "ProgramLexer.h"
 #include <iostream>
 
 void ASTVisitor::visit(ExprNode& node)

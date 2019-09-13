@@ -1,14 +1,14 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include <iostream>
 #include <initializer_list>
+#include <iostream>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "Lexer.h"
 #include "AST/ProgramNode.h"
+#include "Lexer.h"
 
 class Parser
 {
@@ -27,9 +27,9 @@ protected:
     void skip();
     bool match(Token::t_type type);
     bool match(std::initializer_list<Token::t_type> types);
-    bool match(std::function<bool()> predicate);
+    bool match(const std::function<bool()>& predicate);
 
-    std::string error_msg(std::string expected, Token found);
+    std::string error_msg(const std::string& expected, const Token& found);
 };
 
 #endif

@@ -1,9 +1,9 @@
 #ifndef __PYTHON_VISITOR_H__
 #define __PYTHON_VISITOR_H__
 
+#include "AST/ASTVisitor.h"
 #include <iostream>
 #include <sstream>
-#include "AST/ASTVisitor.h"
 
 class PythonVisitor : public ASTVisitor
 {
@@ -32,7 +32,7 @@ public:
     
 private:
     static const char* prog_header;
-    int indent;
+    int indent{0};
 };
 
 #endif

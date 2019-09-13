@@ -1,11 +1,13 @@
 #include "Lexer.h"
 
+#include <utility>
+
 std::map<Token::t_type, std::string> Lexer::token_names = {
     {Token::INVALID_T, "INVALID"},
     {EOF_T, "EOF"}
 };
 
-Lexer::Lexer(std::string _in) : input(_in), pos(0), line(1), col(1)
+Lexer::Lexer(std::string _in) : input(std::move(_in)), pos(0), line(1), col(1)
 {
     if (input.empty())
         curr_char = EOF;
@@ -32,7 +34,7 @@ bool Lexer::match(char x)
     return true;
 }
 
-bool Lexer::match(std::function<bool()> predicate)
+bool Lexer::match(const std::function<bool()>& predicate)
 {
     if (not predicate()) return false;
 

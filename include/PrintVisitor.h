@@ -1,8 +1,8 @@
 #ifndef __PRINT_VISITOR_H__
 #define __PRINT_VISITOR_H__
 
-#include <iostream>
 #include "AST/ASTVisitor.h"
+#include <iostream>
 
 class PrintVisitor : public ASTVisitor
 {
@@ -28,7 +28,7 @@ public:
     void visit(UnOpNode& node);
 
 private:
-    int indent;
+    int indent{0};
 };
 
 #endif

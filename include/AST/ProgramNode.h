@@ -1,8 +1,8 @@
 #ifndef __PROGRAM_NODE_H__
 #define __PROGRAM_NODE_H__
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "CommandNode.h"
 

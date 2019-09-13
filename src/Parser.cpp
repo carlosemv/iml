@@ -49,7 +49,7 @@ bool Parser::match(std::initializer_list<Token::t_type> types)
     return false;
 }
 
-bool Parser::match(std::function<bool()> predicate)
+bool Parser::match(const std::function<bool()>& predicate)
 {
     if (not predicate()) return false;
 
@@ -65,7 +65,7 @@ Token Parser::peek(unsigned la)
         return input.back();
 }
 
-std::string Parser::error_msg(std::string expected, Token found)
+std::string Parser::error_msg(const std::string& expected, const Token& found)
 {
     std::string err("Expected \"");
     err += expected + "\" but found \"" + lex->token_name(found.type);

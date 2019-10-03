@@ -13,6 +13,8 @@ std::string FullType::to_string() const
                 out << "Invalid"; break;
             case ExprType::Integer:
                 out << "Int"; break;
+            case ExprType::Bool:
+                out << "Bool"; break;
             case ExprType::Float:
                 out << "Float"; break;
             case ExprType::Path:

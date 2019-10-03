@@ -10,6 +10,7 @@ enum class ExprType
 {
     Invalid,
     Integer,
+    Bool,
     Float,
     Path,
     Dimensions,

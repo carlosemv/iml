@@ -206,7 +206,7 @@ std::optional<Token::t_type> ProgramLexer::char_type()
         import cog
         import json
 
-        switch_item = "case '{}':\n\treturn {};"
+        switch_item = "case '{}':\n    return {};"
 
         def to_id(token):
             return (token + "_t").upper()

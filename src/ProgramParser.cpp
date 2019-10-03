@@ -302,11 +302,8 @@ std::unique_ptr<ExprNode> ProgramParser::expression()
     }
 
     Token op_tok = curr_token;
-    if (match(ProgramLexer::DIMENSIONS_T)) {
-        std::cout << ProgramLexer::get_token_name(op_tok.type) << std::endl;
-        root = std::make_unique<UnOpNode>(op_tok, std::move(root));
-        return root;
-    }
+    if (match(ProgramLexer::DIMENSIONS_T))
+        return std::make_unique<UnOpNode>(op_tok, std::move(root));
 
     return root;
 }

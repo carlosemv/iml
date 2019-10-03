@@ -9,7 +9,7 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wall -Wextra -pedantic)
+add_compile_options(-Wall -Wextra -pedantic -O3)
 add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
 
 # executables

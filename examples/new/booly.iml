@@ -1,7 +1,0 @@
-if false or false {
-	print "yay"
-} else if false {
-	print "nay"
-} else { 
-	print "never"
-}

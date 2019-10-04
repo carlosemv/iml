@@ -81,6 +81,44 @@ void PythonVisitor::visit(IfNode& node)
     }
 }
 
+void PythonVisitor::visit(CallNode& node)
+{
+    node.func->visit(*this);
+    output << "(";
+    for (auto i = 0u; i < node.args.size(); ++i) {
+        node.args[i]->visit(*this);
+        if (i != node.args.size()-1)
+            output << ", ";
+    }
+    output << ")";
+}
+
+void PythonVisitor::visit(FunctionNode& node)
+{
+    indent++;
+
+    output << "def ";
+
+    node.name->visit(*this);
+
+    output << " (";
+    for (auto p = 0u; p < node.params.size(); ++p) {
+        node.params[p]->visit(*this);
+        if (p != node.params.size()-1)
+            output << ", ";
+    }
+    output << "):\n";
+
+    for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            output << "    ";
+        cmd->visit(*this);
+        output << "\n";
+    }
+
+    indent--;
+}
+
 void PythonVisitor::visit(ForNode& node)
 {
     indent++;

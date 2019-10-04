@@ -39,6 +39,8 @@ std::optional<std::function<std::unique_ptr<CommandNode>()>>
             return std::bind(&ProgramParser::for_stmt, this);
         case ProgramLexer::IF_T:
             return std::bind(&ProgramParser::if_stmt, this);
+        case ProgramLexer::FUNCTION_T:
+            return std::bind(&ProgramParser::function_stmt, this);
         case ProgramLexer::ID_T:
             if (peek(1).type == ProgramLexer::ASSIGN_T)
                 return std::bind(&ProgramParser::assignment, this);
@@ -97,8 +99,8 @@ std::unique_ptr<ExportNode> ProgramParser::export_stmt()
 std::unique_ptr<ExprNode> ProgramParser::import_expr()
 {
     Token import_tok = curr_token;
-    if (not match(ProgramLexer::IMAGE_T))
-        throw_unexpected(ProgramLexer::IMAGE_T);
+    if (not match(ProgramLexer::IMAGE_OP_T))
+        throw_unexpected(ProgramLexer::IMAGE_OP_T);
     if (not match(ProgramLexer::IN_T))
         throw_unexpected(ProgramLexer::IN_T);
 
@@ -151,6 +153,97 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
 
     return std::make_unique<ForNode>(for_tok, recursive,
         iterator, std::move(path), std::move(cmds));
+}
+
+FullType ProgramParser::get_type(const Token& tok)
+{
+    switch (tok.type)
+    {
+        case ProgramLexer::DIMS_T:
+            return FullType(ExprType::Dimensions);
+        case ProgramLexer::SECTION_T:
+            return FullType(ExprType::Section);
+        case ProgramLexer::INT_T:
+            return FullType(ExprType::Integer);
+        case ProgramLexer::FLOAT_T:
+            return FullType(ExprType::Float);
+        case ProgramLexer::IMAGE_T:
+            return FullType(ExprType::Image);
+        case ProgramLexer::PATH_T:
+            return FullType(ExprType::Path);
+        case ProgramLexer::NONE_T:
+            return FullType(ExprType::None);
+    }
+
+    return FullType(ExprType::Invalid);
+}
+
+std::unique_ptr<FunctionNode> ProgramParser::function_stmt()
+{
+    Token func_tok = curr_token;
+    if (not match(ProgramLexer::FUNCTION_T))
+        throw_unexpected(ProgramLexer::FUNCTION_T);
+
+    Token id_tok = curr_token;
+    if (not match(ProgramLexer::ID_T))
+        throw_unexpected(ProgramLexer::ID_T);
+    IdNode name(id_tok);
+
+    if (not match(ProgramLexer::LPAREN_T))
+        throw_unexpected(ProgramLexer::LPAREN_T);
+
+    std::vector<std::unique_ptr<IdNode>> params;
+    Token type_tok;
+    bool expect = false;
+    do {
+        id_tok = curr_token;
+        if (match(ProgramLexer::ID_T)) {
+            auto param = std::make_unique<IdNode>(id_tok);
+            if (not match(ProgramLexer::COLON_T))
+                throw_unexpected(ProgramLexer::COLON_T);
+            type_tok = curr_token;
+            if (not match({ProgramLexer::DIMS_T, ProgramLexer::SECTION_T,
+                    ProgramLexer::INT_T, ProgramLexer::FLOAT_T,
+                    ProgramLexer::IMAGE_T, ProgramLexer::PATH_T})) {
+                throw_unexpected(ProgramLexer::TYPE_T);
+            }
+            param->ftype = get_type(type_tok);
+            params.push_back(std::move(param));
+        } else if (expect) {
+            throw_unexpected(ProgramLexer::ID_T);
+        }
+
+        expect = true;
+    } while (match(ProgramLexer::SEP_T));
+
+    if (not match(ProgramLexer::RPAREN_T))
+        throw_unexpected(ProgramLexer::RPAREN_T);
+
+    name.ftype = FullType(ExprType::None);
+    if (match(ProgramLexer::COLON_T)) {
+        type_tok = curr_token;
+        if (not match({ProgramLexer::DIMS_T, ProgramLexer::SECTION_T,
+                ProgramLexer::INT_T, ProgramLexer::FLOAT_T,
+                ProgramLexer::IMAGE_T, ProgramLexer::PATH_T,
+                ProgramLexer::NONE_T})) {
+            throw_unexpected(ProgramLexer::TYPE_T);
+        }
+        name.ftype = get_type(type_tok);
+    }
+
+    if (not match(ProgramLexer::LBRACE_T))
+        throw_unexpected(ProgramLexer::LBRACE_T);
+
+    std::vector<std::unique_ptr<CommandNode>> cmds;
+    while (auto command = get_command()) {
+        cmds.push_back(command.value()());
+    }
+
+    if (not match(ProgramLexer::RBRACE_T))
+        throw_unexpected(ProgramLexer::RBRACE_T);
+
+    return std::make_unique<FunctionNode>(func_tok,
+        name, std::move(params), std::move(cmds));
 }
 
 std::unique_ptr<IfNode> ProgramParser::if_stmt()
@@ -305,7 +398,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
         if (not match(ProgramLexer::RPAREN_T))
             throw_unexpected(ProgramLexer::RPAREN_T);
 
-        return std::make_unique<DimensionsNode>(ProgramLexer::DIMS_T,
+        return std::make_unique<DimensionsNode>(ProgramLexer::DIMS_LIT_T,
             std::move(components[0]), std::move(components[1]));
     }
 
@@ -317,7 +410,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
     if (not match(ProgramLexer::RPAREN_T))
         throw_unexpected(ProgramLexer::RPAREN_T);
 
-    return std::make_unique<SectionNode>(ProgramLexer::SECTION_T,
+    return std::make_unique<SectionNode>(ProgramLexer::SECTION_LIT_T,
         std::move(components[0]), std::move(components[1]),
         std::move(components[2]), std::move(components[3]));
 }
@@ -418,18 +511,18 @@ std::unique_ptr<ExprNode> ProgramParser::atom()
 std::unique_ptr<ExprNode> ProgramParser::primary()
 {
     switch (curr_token.type) {
-        case ProgramLexer::INTEGER_T:
-        case ProgramLexer::FLOAT_T:
-        case ProgramLexer::PATH_T:
+        case ProgramLexer::INTEGER_LIT_T:
+        case ProgramLexer::FLOAT_LIT_T:
+        case ProgramLexer::PATH_LIT_T:
         case ProgramLexer::TRUE_T:
         case ProgramLexer::FALSE_T:
         {
             ExprType type = ExprType::Invalid;
-            if (curr_token.type == ProgramLexer::INTEGER_T)
+            if (curr_token.type == ProgramLexer::INTEGER_LIT_T)
                 type = ExprType::Integer;
-            else if  (curr_token.type == ProgramLexer::FLOAT_T)
+            else if  (curr_token.type == ProgramLexer::FLOAT_LIT_T)
                 type = ExprType::Float;
-            else if (curr_token.type == ProgramLexer::PATH_T)
+            else if (curr_token.type == ProgramLexer::PATH_LIT_T)
                 type = ExprType::Path;
             else
                 type = ExprType::Bool;
@@ -442,9 +535,17 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
         {
             IdNode node(curr_token);
             skip();
+            if (curr_token.type == ProgramLexer::LPAREN_T) {
+                auto next = peek(1).type;
+                if (next != ProgramLexer::R_T
+                        and next != ProgramLexer::G_T
+                        and next != ProgramLexer::B_T) {
+                    return function_call(node);
+                }
+            }
             return std::make_unique<IdNode>(node);
         }
-        case ProgramLexer::IMAGE_T:
+        case ProgramLexer::IMAGE_OP_T:
             return import_expr();
         case ProgramLexer::ROTATE_T:
         case ProgramLexer::RESIZE_T:
@@ -467,6 +568,29 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
     }
 
     return nullptr;
+}
+
+std::unique_ptr<ExprNode> ProgramParser::function_call(IdNode func)
+{
+    Token call_tok = func.token.value();
+    call_tok.type = ProgramLexer::CALL_T;
+
+    if (not match(ProgramLexer::LPAREN_T))
+        throw_unexpected(ProgramLexer::LPAREN_T);
+
+    std::vector<std::unique_ptr<ExprNode>> args;
+    bool expect = false;
+    do {
+        if (expect or curr_token.type != ProgramLexer::RPAREN_T)
+            args.push_back(expression());
+        expect = true;
+    } while (match(ProgramLexer::SEP_T));
+
+    if (not match(ProgramLexer::RPAREN_T))
+        throw_unexpected(ProgramLexer::RPAREN_T);
+
+    return std::make_unique<CallNode>(call_tok,
+        func, std::move(args));
 }
 
 void ProgramParser::throw_unexpected(const std::string& expected)

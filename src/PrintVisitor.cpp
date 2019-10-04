@@ -72,6 +72,16 @@ void PrintVisitor::visit(IfNode& node)
     indent--;
 }
 
+void PrintVisitor::visit(FunctionNode& node)
+{
+    std::cout << node.name->token.value().text;
+}
+
+void PrintVisitor::visit(CallNode& node)
+{
+    std::cout << node.func->token.value().text;
+}
+
 void PrintVisitor::visit(ForNode& node)
 {
     indent++;

@@ -11,11 +11,13 @@ public:
 
     void visit(AssignNode& node);
     void visit(BinOpNode& node);
+    void visit(CallNode& node);
     void visit(CropNode& node);
     void visit(DimensionsNode& node);
     void visit(ExportNode& node);
     void visit(FlipNode& node);
     void visit(IfNode& node);
+    void visit(FunctionNode& node);
     void visit(ForNode& node);
     void visit(IdNode& node);
     void visit(ImportNode& node);

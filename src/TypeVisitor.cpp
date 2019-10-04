@@ -80,6 +80,30 @@ void TypeVisitor::visit(IfNode& node)
     sym_table.pop_front();
 }
 
+void TypeVisitor::visit(FunctionNode& node)
+{
+    // node.name->ftype set during parsing
+    auto name = node.name->token.value().text;
+    for (auto& param : node.params) {
+        // param->ftype set during parsing
+        node.name->ftype.params.push_back(param->ftype);
+    }
+    sym_table.front()[name] = node.name->ftype;
+
+    sym_table.emplace_front();
+
+    for (auto& param : node.params) {
+        auto id = param->token.value().text;
+        sym_table.front()[id] = param->ftype;
+    }
+
+    for (auto& cmd : node.cmds) {
+        cmd->visit(*this);
+    }
+
+    sym_table.pop_front();
+}
+
 void TypeVisitor::visit(ForNode& node)
 {
     sym_table.emplace_front();
@@ -397,6 +421,60 @@ void TypeVisitor::visit(IdNode& node)
         throw SemanticException("Reference to undefined variable \'"
             + node.token.value().text + "\' in "
             + node.token.value().pos_string());
+}
+
+void TypeVisitor::visit(CallNode& node)
+{
+    auto func = node.func->token.value().text;
+
+    bool found = false;
+    for (auto context : sym_table) {
+        auto it = context.find(func);
+        if (it != context.end()) {
+            node.ftype = it->second;
+            found = true;
+            break;
+        }
+    }
+    if (not found)
+        throw SemanticException("Call to undefined function \'"
+            + func + "\' in " + node.token.value().pos_string());
+
+    for (auto& arg : node.args)
+        arg->visit(*this);
+
+    bool invalid = false;
+    if (node.ftype.params.size() != node.args.size())
+        invalid = true;
+    if (not invalid) {
+        for (auto i = 0u; i < node.args.size(); ++i) {
+            if (node.args[i]->ftype.type 
+                    != node.ftype.params[i].type) {
+                invalid = true;
+                break;
+            }
+        }
+    }
+
+    if (invalid) {
+        std::string err = "Call to function \'" + func 
+            + "\' in " + node.token.value().pos_string()
+            + " has invalid arguments (";
+        for (auto i = 0u; i < node.args.size(); ++i) {
+            err += node.args[i]->ftype.to_string();
+            if (i != node.args.size()-1)
+                err += ", ";
+        }
+        err += "), expected (";
+        for (auto i = 0u; i < node.ftype.params.size(); ++i) {
+            err += node.ftype.params[i].to_string();
+            if (i != node.ftype.params.size()-1)
+                err += ", ";
+        }
+        err += ")";
+
+        throw SemanticException(err);
+    }
 }
 
 void TypeVisitor::visit(ProgramNode& node)

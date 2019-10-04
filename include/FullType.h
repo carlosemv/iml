@@ -9,6 +9,8 @@
 enum class ExprType
 {
     Invalid,
+    None,
+    Function,
     Integer,
     Bool,
     Float,
@@ -23,6 +25,7 @@ struct FullType
 {
     ExprType type{ExprType::Invalid};
     std::vector<FullType> list_types;
+    std::vector<FullType> params;
 
     FullType() = default;
     explicit FullType(ExprType _type);

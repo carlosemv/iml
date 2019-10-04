@@ -12,15 +12,17 @@ static std::map<Token::t_type, std::string> init_token_names()
 
         map_item = "{{{}, \"{}\"}},"
 
-        def to_id(token):
-            return "ProgramLexer::"+(token + "_t").upper()
+        def to_id(tok_dict):
+            name = tok_dict["id"]
+            name = tok_dict.get("token", name)
+            return "ProgramLexer::"+(name + "_t").upper()
 
         with open('tokens.json') as f:
             tokens = json.load(f)
             for tok_dict in tokens:
                 tok_id = tok_dict["id"]
                 tok_name = tok_dict.get("name", tok_id)
-                cog.outl(map_item.format(to_id(tok_id), tok_name))
+                cog.outl(map_item.format(to_id(tok_dict), tok_name))
         ]]]*/
         {ProgramLexer::ID_T, "ID"},
         {ProgramLexer::COMMENT_T, "comment"},
@@ -31,13 +33,14 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::LBRACE_T, "left brace"},
         {ProgramLexer::RBRACE_T, "right brace"},
         {ProgramLexer::SEP_T, "separator"},
+        {ProgramLexer::COLON_T, "colon"},
         {ProgramLexer::PLUS_T, "plus"},
         {ProgramLexer::MINUS_T, "minus"},
         {ProgramLexer::MULT_T, "mult."},
         {ProgramLexer::DIV_T, "division"},
-        {ProgramLexer::INTEGER_T, "integer"},
-        {ProgramLexer::FLOAT_T, "float"},
-        {ProgramLexer::PATH_T, "path"},
+        {ProgramLexer::INTEGER_LIT_T, "integer_lit"},
+        {ProgramLexer::FLOAT_LIT_T, "float_lit"},
+        {ProgramLexer::PATH_LIT_T, "path_lit"},
         {ProgramLexer::EQUALS_T, "equals"},
         {ProgramLexer::NEQUALS_T, "not equals"},
         {ProgramLexer::LEQ_T, "<="},
@@ -58,10 +61,11 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::BY_T, "by"},
         {ProgramLexer::CROP_T, "crop"},
         {ProgramLexer::FROM_T, "from"},
+        {ProgramLexer::FUNCTION_T, "function"},
         {ProgramLexer::FOR_T, "for"},
         {ProgramLexer::ALL_T, "all"},
         {ProgramLexer::IN_T, "in"},
-        {ProgramLexer::IMAGE_T, "image"},
+        {ProgramLexer::IMAGE_OP_T, "image"},
         {ProgramLexer::SAVE_T, "save"},
         {ProgramLexer::AS_T, "as"},
         {ProgramLexer::FLIP_T, "flip"},
@@ -75,9 +79,18 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::BRIGHTNESS_T, "brightness"},
         {ProgramLexer::CONTRAST_T, "contrast"},
         {ProgramLexer::COLOR_T, "color"},
+        {ProgramLexer::IMAGE_T, "Image"},
+        {ProgramLexer::DIMS_T, "Dims"},
+        {ProgramLexer::SECTION_T, "Section"},
+        {ProgramLexer::FLOAT_T, "Float"},
+        {ProgramLexer::INT_T, "Int"},
+        {ProgramLexer::PATH_T, "Path"},
+        {ProgramLexer::NONE_T, "None"},
+        {ProgramLexer::TYPE_T, "type"},
+        {ProgramLexer::CALL_T, "call"},
         {ProgramLexer::UNMINUS_T, "unminus"},
-        {ProgramLexer::SECTION_T, "section"},
-        {ProgramLexer::DIMS_T, "dimensions"},
+        {ProgramLexer::SECTION_LIT_T, "section_lit"},
+        {ProgramLexer::DIMS_LIT_T, "dimensions"},
         {ProgramLexer::DIMENSIONS_T, "dimensions operator"},
         {ProgramLexer::PROG_T, "program"},
         // [[[end]]]
@@ -96,15 +109,17 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
 
     map_item = "{{\"{}\", {}}},"
 
-    def to_id(token):
-        return (token + "_t").upper()
+    def to_id(tok_dict):
+        name = tok_dict["id"]
+        name = tok_dict.get("token", name)
+        return (name + "_t").upper()
 
     with open('tokens.json') as f:
         tokens = json.load(f)
         for tok_dict in tokens:
             tok_id = tok_dict["id"]
             if tok_dict.get("keyword"):
-                cog.outl(map_item.format(tok_id, to_id(tok_id)))
+                cog.outl(map_item.format(tok_id, to_id(tok_dict)))
     ]]]*/
     {"not", NOT_T},
     {"and", AND_T},
@@ -120,10 +135,11 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
     {"by", BY_T},
     {"crop", CROP_T},
     {"from", FROM_T},
+    {"function", FUNCTION_T},
     {"for", FOR_T},
     {"all", ALL_T},
     {"in", IN_T},
-    {"image", IMAGE_T},
+    {"image", IMAGE_OP_T},
     {"save", SAVE_T},
     {"as", AS_T},
     {"flip", FLIP_T},
@@ -137,6 +153,13 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
     {"brightness", BRIGHTNESS_T},
     {"contrast", CONTRAST_T},
     {"color", COLOR_T},
+    {"Image", IMAGE_T},
+    {"Dims", DIMS_T},
+    {"Section", SECTION_T},
+    {"Float", FLOAT_T},
+    {"Int", INT_T},
+    {"Path", PATH_T},
+    {"None", NONE_T},
     {"dimensions", DIMENSIONS_T},
     // [[[end]]]
 };
@@ -201,7 +224,7 @@ Token ProgramLexer::path()
 
     if (not match('"'))
         return Token(Token::INVALID_T, t, l, c);
-    return Token(PATH_T, t, l, c);
+    return Token(PATH_LIT_T, t, l, c);
 }
 
 Token ProgramLexer::number()
@@ -215,7 +238,7 @@ Token ProgramLexer::number()
     while (match(std::bind(&ProgramLexer::is_digit, this))) {}
 
     auto t = text_from(p);
-    return Token(is_float? FLOAT_T : INTEGER_T, t, l, c);
+    return Token(is_float? FLOAT_LIT_T : INTEGER_LIT_T, t, l, c);
 }
 
 std::optional<Token::t_type> ProgramLexer::char_type()
@@ -228,15 +251,17 @@ std::optional<Token::t_type> ProgramLexer::char_type()
 
         switch_item = "case '{}':\n    return {};"
 
-        def to_id(token):
-            return (token + "_t").upper()
+        def to_id(tok_dict):
+            name = tok_dict["id"]
+            name = tok_dict.get("token", name)
+            return (name + "_t").upper()
 
         with open('tokens.json') as f:
             tokens = json.load(f)
             for tok_dict in tokens:
                 symb = tok_dict.get("symbol")
                 if symb:
-                    tok_id = to_id(tok_dict["id"])
+                    tok_id = to_id(tok_dict)
                     cog.outl(switch_item.format(symb, tok_id))
         ]]]*/
         case '#':
@@ -253,6 +278,8 @@ std::optional<Token::t_type> ProgramLexer::char_type()
             return RBRACE_T;
         case ',':
             return SEP_T;
+        case ':':
+            return COLON_T;
         case '+':
             return PLUS_T;
         case '-':

@@ -11,8 +11,10 @@
 
 #include "AST/AssignNode.h"
 #include "AST/CommandNode.h"
+#include "AST/CallNode.h"
 #include "AST/ExportNode.h"
 #include "AST/ExprNode.h"
+#include "AST/FunctionNode.h"
 #include "AST/IfNode.h"
 #include "AST/ForNode.h"
 #include "AST/ModifyNode.h"
@@ -38,6 +40,8 @@ protected:
     std::unique_ptr<ExportNode> export_stmt();
     std::unique_ptr<IfNode> if_stmt();
     std::unique_ptr<ForNode> for_stmt();
+    std::unique_ptr<FunctionNode> function_stmt();
+    std::unique_ptr<ExprNode> function_call(IdNode func);
 
     std::unique_ptr<ExprNode> expression();
     std::unique_ptr<ExprNode> img_expr();
@@ -51,6 +55,7 @@ protected:
     std::unique_ptr<ExprNode> primary();
 
     std::optional<std::function<std::unique_ptr<CommandNode>()>> get_command();
+    FullType get_type(const Token& tok);
 };
 
 #endif

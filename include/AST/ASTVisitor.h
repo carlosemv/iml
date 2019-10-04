@@ -3,10 +3,12 @@
 
 #include "AssignNode.h"
 #include "BinOpNode.h"
+#include "CallNode.h"
 #include "CropNode.h"
 #include "DimensionsNode.h"
 #include "ExportNode.h"
 #include "FlipNode.h"
+#include "FunctionNode.h"
 #include "IfNode.h"
 #include "ForNode.h"
 #include "IdNode.h"
@@ -30,10 +32,12 @@ public:
     void visit(CommandNode& node);
     virtual void visit(AssignNode& node) = 0;
     virtual void visit(BinOpNode& node) = 0;
+    virtual void visit(CallNode& node) = 0;
     virtual void visit(CropNode& node) = 0;
     virtual void visit(DimensionsNode& node) = 0;
     virtual void visit(ExportNode& node) = 0;
     virtual void visit(FlipNode& node) = 0;
+    virtual void visit(FunctionNode& node) = 0;
     virtual void visit(IfNode& node) = 0;
     virtual void visit(ForNode& node) = 0;
     virtual void visit(IdNode& node) = 0;

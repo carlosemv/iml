@@ -7,17 +7,17 @@ void ASTVisitor::visit(ExprNode& node)
 {
     if (node.token) {
         switch (node.token.value().type) {
-            case ProgramLexer::INTEGER_T:
-            case ProgramLexer::FLOAT_T:
-            case ProgramLexer::PATH_T:
+            case ProgramLexer::INTEGER_LIT_T:
+            case ProgramLexer::FLOAT_LIT_T:
+            case ProgramLexer::PATH_LIT_T:
             case ProgramLexer::TRUE_T:
             case ProgramLexer::FALSE_T:
                 cast_visit<ScalarNode&>(node, "ScalarNode");
                 break;
-            case ProgramLexer::SECTION_T:
+            case ProgramLexer::SECTION_LIT_T:
                 cast_visit<SectionNode&>(node, "SectionNode");
                 break;
-            case ProgramLexer::DIMS_T:
+            case ProgramLexer::DIMS_LIT_T:
                 cast_visit<DimensionsNode&>(node, "DimensionsNode");
                 break;
             case ProgramLexer::ID_T:
@@ -45,7 +45,7 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::B_T:
                 cast_visit<UnOpNode&>(node, "UnOpNode");
                 break;
-            case ProgramLexer::IMAGE_T:
+            case ProgramLexer::IMAGE_OP_T:
                 cast_visit<ImportNode&>(node, "ImportNode");
                 break;
             case ProgramLexer::ROTATE_T:
@@ -62,6 +62,9 @@ void ASTVisitor::visit(ExprNode& node)
                 break;
             case ProgramLexer::MODIFY_T:
                 cast_visit<ModifyNode&>(node, "ModifyNode");
+                break;
+            case ProgramLexer::CALL_T:
+                cast_visit<CallNode&>(node, "CallNode");
                 break;
             default:
             {
@@ -81,6 +84,9 @@ void ASTVisitor::visit(CommandNode& node)
 {
     if (node.token) {
         switch (node.token.value().type) {
+            case ProgramLexer::FUNCTION_T:
+                cast_visit<FunctionNode&>(node, "FunctionNode");
+                break;
             case ProgramLexer::ASSIGN_T:
                 cast_visit<AssignNode&>(node, "AssignNode");
                 break;
@@ -101,6 +107,7 @@ void ASTVisitor::visit(CommandNode& node)
             case ProgramLexer::CROP_T:
             case ProgramLexer::FLIP_T:
             case ProgramLexer::MODIFY_T:
+            case ProgramLexer::CALL_T:
                 try {
                     auto& expr = dynamic_cast<ExprNode&>(node);
                     expr.command = true;

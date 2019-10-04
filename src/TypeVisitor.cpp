@@ -499,115 +499,76 @@ void TypeVisitor::visit(ProgramNode& node)
 void TypeVisitor::visit([[maybe_unused]] ScalarNode& node)
 {}
 
-
-void TypeVisitor::check_bool(
-    std::optional<Token> tok, const FullType& type)
+void TypeVisitor::check_type(std::optional<Token> tok,
+    const FullType& type,
+    const std::function<bool(const FullType&)>& predicate,
+    std::string expected)
 {
     if (tok) {
         auto op = tok.value();
-        if (type.type != ExprType::Bool)
+        if (not predicate(type))
             throw SemanticException("Expression \'"
                 + op.text + "\' at " + op.pos_string()
                 + ", has invalid type " + type.to_string()
-                + "; expected a boolean");
+                + "; expected " + expected);
     } else {
         throw CompilerException("Expression"\
             " has no defining token\n");
     }
+}
+
+void TypeVisitor::check_bool(
+    std::optional<Token> tok, const FullType& type)
+{
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Bool;},
+        "a boolean");
 }
 
 void TypeVisitor::check_num(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (not type.is_num())
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected a numerical type");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.is_num();},
+        "a numerical type");
 }
 
 void TypeVisitor::check_image(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (type.type != ExprType::Image)
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected an image");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Image;},
+        "an image");
 }
 
 void TypeVisitor::check_path(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (type.type != ExprType::Path)
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected a path");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Path;},
+        "a path");
 }
 
 void TypeVisitor::check_id(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (type.type != ExprType::Id)
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected an identifier");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Id;},
+        "an identifier");
 }
 
 void TypeVisitor::check_dimensions(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (type.type != ExprType::Dimensions)
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected dimensions");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Dimensions;},
+        "dimensions");
 }
 
 void TypeVisitor::check_section(
     std::optional<Token> tok, const FullType& type)
 {
-    if (tok) {
-        auto op = tok.value();
-        if (type.type != ExprType::Section)
-            throw SemanticException("Expression \'"
-                + op.text + "\' at " + op.pos_string()
-                + ", has invalid type " + type.to_string()
-                + "; expected a section");
-    } else {
-        throw CompilerException("Expression"\
-            " has no defining token\n");
-    }
+    check_type(tok, type,
+        [](auto t){return t.type == ExprType::Section;},
+        "a section");
 }

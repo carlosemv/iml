@@ -2,6 +2,7 @@
 #define __TYPE_VISITOR_H__
 
 #include "AST/ASTVisitor.h"
+#include <functional>
 #include <forward_list>
 #include <iostream>
 #include <map>
@@ -36,6 +37,10 @@ public:
 
 private:
     std::forward_list<std::map<std::string, FullType>> sym_table;
+    static void check_type(std::optional<Token> tok, const FullType& type,
+        const std::function<bool(const FullType&)>& predicate,
+        std::string expected);
+
     static void check_bool(std::optional<Token> tok, const FullType& type);
     static void check_num(std::optional<Token> tok, const FullType& type);
     static void check_image(std::optional<Token> tok, const FullType& type);

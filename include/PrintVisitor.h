@@ -23,6 +23,7 @@ public:
     void visit(ImportNode& node);
     void visit(ModifyNode& node);
     void visit(PrintNode& node);
+    void visit(ReturnNode& node);
     void visit(ProgramNode& node);
     void visit(ResizeNode& node);
     void visit(RotateNode& node);

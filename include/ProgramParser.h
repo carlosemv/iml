@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <stack>
 
 #include "Parser.h"
 #include "ProgramLexer.h"
@@ -19,6 +20,7 @@
 #include "AST/ForNode.h"
 #include "AST/ModifyNode.h"
 #include "AST/PrintNode.h"
+#include "AST/ReturnNode.h"
 #include "AST/ProgramNode.h"
 
 class ProgramParser : public Parser
@@ -30,6 +32,8 @@ public:
     ProgramNode parse();
 
 protected:
+    std::stack<FullType> func_defs;
+
     void throw_unexpected(const std::string& expected);
     void throw_unexpected(Token::t_type expected);
 
@@ -37,6 +41,7 @@ protected:
 
     std::unique_ptr<AssignNode> assignment();
     std::unique_ptr<PrintNode> print_stmt();
+    std::unique_ptr<ReturnNode> return_stmt();
     std::unique_ptr<ExportNode> export_stmt();
     std::unique_ptr<IfNode> if_stmt();
     std::unique_ptr<ForNode> for_stmt();

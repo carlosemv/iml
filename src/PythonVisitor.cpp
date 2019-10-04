@@ -274,6 +274,12 @@ void PythonVisitor::visit(PrintNode& node)
     }
 }
 
+void PythonVisitor::visit(ReturnNode& node)
+{
+    output << "return ";
+    node.expr->visit(*this);
+}
+
 void PythonVisitor::visit(BinOpNode& node)
 {
     if (not node.token)

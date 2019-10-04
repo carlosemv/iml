@@ -93,6 +93,9 @@ void ASTVisitor::visit(CommandNode& node)
             case ProgramLexer::PRINT_T:
                 cast_visit<PrintNode&>(node, "PrintNode");
                 break;
+            case ProgramLexer::RETURN_T:
+                cast_visit<ReturnNode&>(node, "ReturnNode");
+                break;
             case ProgramLexer::SAVE_T:
                 cast_visit<ExportNode&>(node, "ExportNode");
                 break;

@@ -33,6 +33,8 @@ std::optional<std::function<std::unique_ptr<CommandNode>()>>
     {
         case ProgramLexer::PRINT_T:
             return std::bind(&ProgramParser::print_stmt, this);
+        case ProgramLexer::RETURN_T:
+            return std::bind(&ProgramParser::return_stmt, this);
         case ProgramLexer::SAVE_T:
             return std::bind(&ProgramParser::export_stmt, this);
         case ProgramLexer::FOR_T:
@@ -79,6 +81,20 @@ std::unique_ptr<PrintNode> ProgramParser::print_stmt()
         throw_unexpected(ProgramLexer::PRINT_T);
 
     return std::make_unique<PrintNode>(print_tok, expression());
+}
+
+std::unique_ptr<ReturnNode> ProgramParser::return_stmt()
+{
+    if (func_defs.empty())
+        throw_unexpected("command");
+    auto func_type = func_defs.top();
+    
+    Token return_tok = curr_token;
+    if (not match(ProgramLexer::RETURN_T))
+        throw_unexpected(ProgramLexer::RETURN_T);
+
+    return std::make_unique<ReturnNode>(
+        return_tok, func_type, expression());
 }
 
 std::unique_ptr<ExportNode> ProgramParser::export_stmt()
@@ -231,6 +247,8 @@ std::unique_ptr<FunctionNode> ProgramParser::function_stmt()
         name.ftype = get_type(type_tok);
     }
 
+    func_defs.push(name.ftype);
+
     if (not match(ProgramLexer::LBRACE_T))
         throw_unexpected(ProgramLexer::LBRACE_T);
 
@@ -241,6 +259,8 @@ std::unique_ptr<FunctionNode> ProgramParser::function_stmt()
 
     if (not match(ProgramLexer::RBRACE_T))
         throw_unexpected(ProgramLexer::RBRACE_T);
+
+    func_defs.pop();
 
     return std::make_unique<FunctionNode>(func_tok,
         name, std::move(params), std::move(cmds));

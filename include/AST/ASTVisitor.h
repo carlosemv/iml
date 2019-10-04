@@ -15,6 +15,7 @@
 #include "ImportNode.h"
 #include "ModifyNode.h"
 #include "PrintNode.h"
+#include "ReturnNode.h"
 #include "ProgramNode.h"
 #include "ResizeNode.h"
 #include "RotateNode.h"
@@ -44,6 +45,7 @@ public:
     virtual void visit(ImportNode& node) = 0;
     virtual void visit(ModifyNode& node) = 0;
     virtual void visit(PrintNode& node) = 0;
+    virtual void visit(ReturnNode& node) = 0;
     virtual void visit(ProgramNode& node) = 0;
     virtual void visit(ResizeNode& node) = 0;
     virtual void visit(RotateNode& node) = 0;

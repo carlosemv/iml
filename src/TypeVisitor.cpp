@@ -278,6 +278,19 @@ void TypeVisitor::visit(PrintNode& node)
     node.expr->visit(*this);
 }
 
+void TypeVisitor::visit(ReturnNode& node)
+{
+    node.expr->visit(*this);
+    if (node.expr->ftype.type != node.function_type.type) {
+        auto expr = node.expr->token.value();
+        throw SemanticException("Returned expression \'"
+            + expr.text + "\' at " + expr.pos_string()
+            + ", has invalid type "
+            + node.expr->ftype.to_string()
+            + "; expected " + node.function_type.to_string());
+    }
+}
+
 FullType TypeVisitor::binop_type(Token op,
     FullType lhs, FullType rhs)
 {

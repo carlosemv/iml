@@ -183,6 +183,12 @@ void PrintVisitor::visit(PrintNode& node)
     node.expr->visit(*this);
 }
 
+void PrintVisitor::visit(ReturnNode& node)
+{
+    std::cout << "return ";
+    node.expr->visit(*this);
+}
+
 void PrintVisitor::visit(BinOpNode& node)
 {
     node.lhs->visit(*this);

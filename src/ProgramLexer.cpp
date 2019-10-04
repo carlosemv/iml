@@ -171,6 +171,13 @@ bool ProgramLexer::is_letter()
     return std::isalpha(curr_char);
 }
 
+bool ProgramLexer::is_char()
+{
+    return (std::isalpha(curr_char)
+        or std::isdigit(curr_char)
+        or curr_char == '_');
+}
+
 bool ProgramLexer::is_digit()
 {
     return std::isdigit(curr_char);
@@ -204,6 +211,9 @@ Token ProgramLexer::id_or_keyword()
     auto t = text_from(p);
     if (keywords.find(t) != keywords.end())
         return Token(keywords[t], t, l, c);
+
+    while (match(std::bind(&ProgramLexer::is_char, this))) {}
+    t = text_from(p);
     return Token(ID_T, t, l, c);
 }
 

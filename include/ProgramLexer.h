@@ -115,6 +115,7 @@ public:
     static bool channel_token(Token::t_type type);
 
 protected:
+    bool is_char();
     bool is_letter();
     bool is_digit();
     bool is_linebreak();

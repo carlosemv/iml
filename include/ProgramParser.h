@@ -13,6 +13,7 @@
 #include "AST/CommandNode.h"
 #include "AST/ExportNode.h"
 #include "AST/ExprNode.h"
+#include "AST/IfNode.h"
 #include "AST/ForNode.h"
 #include "AST/ModifyNode.h"
 #include "AST/PrintNode.h"
@@ -35,6 +36,7 @@ protected:
     std::unique_ptr<AssignNode> assignment();
     std::unique_ptr<PrintNode> print_stmt();
     std::unique_ptr<ExportNode> export_stmt();
+    std::unique_ptr<IfNode> if_stmt();
     std::unique_ptr<ForNode> for_stmt();
 
     std::unique_ptr<ExprNode> expression();

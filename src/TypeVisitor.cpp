@@ -63,6 +63,23 @@ void TypeVisitor::visit(FlipNode& node)
     node.ftype = FullType(ExprType::Image);
 }
 
+void TypeVisitor::visit(IfNode& node)
+{
+    sym_table.emplace_front();
+
+    node.condition->visit(*this);
+    check_bool(node.condition->token,
+        node.condition->ftype);
+
+    for (auto& cmd : node.cmds)
+        cmd->visit(*this);
+
+    for (auto& cmd : node.else_body)
+        cmd->visit(*this);        
+
+    sym_table.pop_front();
+}
+
 void TypeVisitor::visit(ForNode& node)
 {
     sym_table.emplace_front();
@@ -371,6 +388,23 @@ void TypeVisitor::visit(ProgramNode& node)
 
 void TypeVisitor::visit([[maybe_unused]] ScalarNode& node)
 {}
+
+
+void TypeVisitor::check_bool(
+    std::optional<Token> tok, const FullType& type)
+{
+    if (tok) {
+        auto op = tok.value();
+        if (type.type != ExprType::Bool)
+            throw SemanticException("Expression \'"
+                + op.text + "\' at " + op.pos_string()
+                + ", has invalid type " + type.to_string()
+                + "; expected a boolean");
+    } else {
+        throw CompilerException("Expression"\
+            " has no defining token\n");
+    }
+}
 
 void TypeVisitor::check_num(
     std::optional<Token> tok, const FullType& type)

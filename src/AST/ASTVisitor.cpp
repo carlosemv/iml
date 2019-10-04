@@ -83,6 +83,9 @@ void ASTVisitor::visit(CommandNode& node)
             case ProgramLexer::SAVE_T:
                 cast_visit<ExportNode&>(node, "ExportNode");
                 break;
+            case ProgramLexer::IF_T:
+                cast_visit<IfNode&>(node, "IfNode");
+                break;
             case ProgramLexer::FOR_T:
                 cast_visit<ForNode&>(node, "ForNode");
                 break;

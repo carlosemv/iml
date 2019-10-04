@@ -49,6 +49,38 @@ void PythonVisitor::visit(FlipNode& node)
         output << "FLIP_TOP_BOTTOM)";
 }
 
+void PythonVisitor::visit(IfNode& node)
+{
+    output << "if ";
+
+    node.condition->visit(*this);
+    output << ":\n";
+
+    indent++;
+    for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            output << "    ";
+        cmd->visit(*this);
+        output << "\n";
+    }
+    indent--;
+
+    if (not node.else_body.empty()) {
+        for (auto i = 0; i < indent; ++i)
+            output << "    ";
+        output << "else:\n";
+
+        indent++;
+        for (auto& cmd : node.else_body) {
+            for (auto i = 0; i < indent; ++i)
+                output << "    ";
+            cmd->visit(*this);
+            output << "\n";
+        }
+        indent--;
+    }
+}
+
 void PythonVisitor::visit(ForNode& node)
 {
     indent++;

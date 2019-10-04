@@ -7,6 +7,7 @@
 #include "DimensionsNode.h"
 #include "ExportNode.h"
 #include "FlipNode.h"
+#include "IfNode.h"
 #include "ForNode.h"
 #include "IdNode.h"
 #include "ImportNode.h"
@@ -33,6 +34,7 @@ public:
     virtual void visit(DimensionsNode& node) = 0;
     virtual void visit(ExportNode& node) = 0;
     virtual void visit(FlipNode& node) = 0;
+    virtual void visit(IfNode& node) = 0;
     virtual void visit(ForNode& node) = 0;
     virtual void visit(IdNode& node) = 0;
     virtual void visit(ImportNode& node) = 0;

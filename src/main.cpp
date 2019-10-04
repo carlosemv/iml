@@ -7,6 +7,7 @@
 #include "ProgramParser.h"
 #include "PythonVisitor.h"
 #include "TypeVisitor.h"
+#include "PrintVisitor.h"
 
 std::optional<ProgramNode> parse(const std::string& input)
 {
@@ -52,6 +53,25 @@ bool generate(ProgramNode& root, const std::string& out_file)
     return false;
 }
 
+bool debug_print(ProgramNode& root)
+{
+    PrintVisitor pv;
+
+    try {
+        pv.visit(root);
+        std::cout << "Successfully compiled\n";
+        return true;
+    } catch (SemanticException& e) {
+        std::cerr << "[Semantic Error] ";
+        std::cerr << e.what() << std::endl;
+    } catch (CompilerException& e) {
+        std::cerr << "[Compiler Exception] ";
+        std::cerr << e.what() << std::endl;
+    }
+
+    return false;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 3) {
@@ -67,6 +87,8 @@ int main(int argc, char* argv[])
     if (prog_root) {
         if (generate(prog_root.value(), output))
             return EXIT_SUCCESS;
+        // if (debug_print(prog_root.value()))
+            // return EXIT_SUCCESS;
     }
 
     return EXIT_FAILURE;

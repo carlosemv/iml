@@ -1,2 +1,7 @@
-a = false
-print a and true
+if false or false {
+	print "yay"
+} else if false {
+	print "nay"
+} else { 
+	print "never"
+}

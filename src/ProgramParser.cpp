@@ -37,6 +37,8 @@ std::optional<std::function<std::unique_ptr<CommandNode>()>>
             return std::bind(&ProgramParser::export_stmt, this);
         case ProgramLexer::FOR_T:
             return std::bind(&ProgramParser::for_stmt, this);
+        case ProgramLexer::IF_T:
+            return std::bind(&ProgramParser::if_stmt, this);
         case ProgramLexer::ID_T:
             if (peek(1).type == ProgramLexer::ASSIGN_T)
                 return std::bind(&ProgramParser::assignment, this);
@@ -149,6 +151,47 @@ std::unique_ptr<ForNode> ProgramParser::for_stmt()
 
     return std::make_unique<ForNode>(for_tok, recursive,
         iterator, std::move(path), std::move(cmds));
+}
+
+std::unique_ptr<IfNode> ProgramParser::if_stmt()
+{
+    Token if_tok = curr_token;
+    if (not match(ProgramLexer::IF_T))
+        throw_unexpected(ProgramLexer::IF_T);
+
+    std::unique_ptr<ExprNode> cond = expression();
+
+    if (not match(ProgramLexer::LBRACE_T))
+        throw_unexpected(ProgramLexer::LBRACE_T);
+
+    std::vector<std::unique_ptr<CommandNode>> body;
+    while (auto command = get_command()) {
+        body.push_back(command.value()());
+    }
+
+    if (not match(ProgramLexer::RBRACE_T))
+        throw_unexpected(ProgramLexer::RBRACE_T);
+
+
+    std::vector<std::unique_ptr<CommandNode>> else_body;
+    if (match(ProgramLexer::ELSE_T)) {
+        if (curr_token.type == ProgramLexer::IF_T) {
+            else_body.push_back(if_stmt());
+        } else {
+            if (not match(ProgramLexer::LBRACE_T))
+                throw_unexpected(ProgramLexer::LBRACE_T);
+
+            while (auto command = get_command()) {
+                else_body.push_back(command.value()());
+            }
+
+            if (not match(ProgramLexer::RBRACE_T))
+                throw_unexpected(ProgramLexer::RBRACE_T);
+        }
+    }
+
+    return std::make_unique<IfNode>(if_tok, std::move(cond),
+        std::move(body), std::move(else_body));
 }
 
 std::unique_ptr<ExprNode> ProgramParser::img_expr()

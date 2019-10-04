@@ -18,6 +18,7 @@ public:
     void visit(DimensionsNode& node);
     void visit(ExportNode& node);
     void visit(FlipNode& node);
+    void visit(IfNode& node);
     void visit(ForNode& node);
     void visit(IdNode& node);
     void visit(ImportNode& node);
@@ -32,6 +33,7 @@ public:
 
 private:
     std::forward_list<std::map<std::string, FullType>> sym_table;
+    static void check_bool(std::optional<Token> tok, const FullType& type);
     static void check_num(std::optional<Token> tok, const FullType& type);
     static void check_image(std::optional<Token> tok, const FullType& type);
     static void check_path(std::optional<Token> tok, const FullType& type);

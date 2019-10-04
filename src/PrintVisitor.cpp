@@ -37,6 +37,41 @@ void PrintVisitor::visit(FlipNode& node)
         std::cout << " horizontally";
 }
 
+void PrintVisitor::visit(IfNode& node)
+{
+    indent++;
+
+    std::cout << "if ";
+    node.condition->visit(*this);
+
+    std::cout << " {" << std::endl;
+    for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            std::cout << "    ";
+        cmd->visit(*this);
+        std::cout << std::endl;
+    }
+    for (auto i = 0; i < indent-1; ++i)
+        std::cout << "    ";
+    std::cout << "}";
+
+    if (not node.else_body.empty()) {
+        std::cout << " else ";
+        std::cout << " {" << std::endl;
+        for (auto& cmd : node.else_body) {
+            for (auto i = 0; i < indent; ++i)
+                std::cout << "    ";
+            cmd->visit(*this);
+            std::cout << std::endl;
+        }
+        for (auto i = 0; i < indent-1; ++i)
+            std::cout << "    ";
+        std::cout << "}";
+    }
+
+    indent--;
+}
+
 void PrintVisitor::visit(ForNode& node)
 {
     indent++;

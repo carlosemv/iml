@@ -73,5 +73,12 @@ def _path_div(p1, p2):
         return p1 / p2
 
 
-a_ = False
-print((a_ and True))
+if (False or False):
+    print(_Path("yay"))
+else:
+    if False:
+        print(_Path("nay"))
+    else:
+        print(_Path("never"))
+
+

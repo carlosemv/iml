@@ -74,12 +74,42 @@ void PrintVisitor::visit(IfNode& node)
 
 void PrintVisitor::visit(FunctionNode& node)
 {
-    std::cout << node.name->token.value().text;
+    indent++;
+
+    std::cout << "function ";
+
+    node.name->visit(*this);
+
+    std::cout << " (";
+    for (auto p = 0u; p < node.params.size(); ++p) {
+        node.params[p]->visit(*this);
+        std::cout << ": " << node.params[p]->ftype.to_string();
+        if (p != node.params.size()-1)
+            std::cout << ", ";
+    }
+    std::cout << "): " << node.name->ftype.to_string() << " {\n";
+
+    for (auto& cmd : node.cmds) {
+        for (auto i = 0; i < indent; ++i)
+            std::cout << "    ";
+        cmd->visit(*this);
+        std::cout << "\n";
+    }
+    std::cout << "}";
+
+    indent--;
 }
 
 void PrintVisitor::visit(CallNode& node)
 {
-    std::cout << node.func->token.value().text;
+    node.func->visit(*this);
+    std::cout << "(";
+    for (auto i = 0u; i < node.args.size(); ++i) {
+        node.args[i]->visit(*this);
+        if (i != node.args.size()-1)
+            std::cout << ", ";
+    }
+    std::cout << ")";
 }
 
 void PrintVisitor::visit(ForNode& node)

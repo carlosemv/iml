@@ -267,6 +267,10 @@ void PythonVisitor::visit(PrintNode& node)
     if (node.expr->ftype.type == ExprType::Image) {
         node.expr->visit(*this);
         output << ".show()";
+    } else if (node.expr->ftype.type == ExprType::Bool) {
+        output << "print(\"true\" if ";
+        node.expr->visit(*this);
+        output << " else \"false\")";
     } else {
         output << "print(";
         node.expr->visit(*this);

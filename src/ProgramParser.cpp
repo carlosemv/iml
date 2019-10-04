@@ -356,7 +356,10 @@ std::unique_ptr<ExprNode> ProgramParser::bool_expr()
     std::unique_ptr<ExprNode> root = arith_expr();
 
     Token op_tok = curr_token;
-    while (match({ProgramLexer::AND_T, ProgramLexer::OR_T})) {
+    while (match({ProgramLexer::AND_T, ProgramLexer::OR_T,
+            ProgramLexer::EQUALS_T, ProgramLexer::NEQUALS_T,
+            ProgramLexer::LEQ_T, ProgramLexer::GEQ_T,
+            ProgramLexer::LESS_T, ProgramLexer::GREATER_T})) {
         root = std::make_unique<BinOpNode>(
             std::move(root), op_tok, arith_expr());
         op_tok = curr_token;
@@ -387,7 +390,6 @@ std::unique_ptr<ExprNode> ProgramParser::term()
     while (match({ProgramLexer::MULT_T, ProgramLexer::DIV_T})) {
         root = std::make_unique<BinOpNode>(
             std::move(root), op_tok, factor());
-        op_tok = curr_token;
     }
 
     return root;
@@ -398,6 +400,8 @@ std::unique_ptr<ExprNode> ProgramParser::factor()
     Token op_tok = curr_token;
     if (match(ProgramLexer::MINUS_T)) {
         op_tok.type = ProgramLexer::UNMINUS_T;
+        return std::make_unique<UnOpNode>(op_tok, factor());
+    } else if (match(ProgramLexer::NOT_T)) {
         return std::make_unique<UnOpNode>(op_tok, factor());
     }
 

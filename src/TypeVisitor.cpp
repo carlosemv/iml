@@ -204,6 +204,11 @@ void TypeVisitor::visit(UnOpNode& node)
                 node.ftype.type = expr_type.type;
                 return;
             }
+        } else if (op.type == ProgramLexer::NOT_T) {
+            if (expr_type.type == ExprType::Bool) {
+                node.ftype.type = expr_type.type;
+                return;
+            }
         } else if (op.type == ProgramLexer::DIMENSIONS_T) {
             if (expr_type.type == ExprType::Image) {
                 node.ftype.type = ExprType::Dimensions;
@@ -258,6 +263,20 @@ FullType TypeVisitor::binop_type(Token op,
             if (lhs.type == rhs.type and
                     lhs.type == ExprType::Bool)
                 return lhs;
+            break;
+        case ProgramLexer::EQUALS_T:
+        case ProgramLexer::NEQUALS_T:
+            if ((lhs.is_num() and rhs.is_num())
+                    or (lhs.type == rhs.type
+                    and lhs.type != ExprType::Image))
+                return FullType(ExprType::Bool);
+            break;
+        case ProgramLexer::LEQ_T:
+        case ProgramLexer::GEQ_T:
+        case ProgramLexer::LESS_T:
+        case ProgramLexer::GREATER_T:
+            if ((lhs.is_num() and rhs.is_num()))
+                return FullType(ExprType::Bool);
             break;
         case ProgramLexer::PLUS_T:
             if (lhs.type == rhs.type)

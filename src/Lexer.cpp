@@ -26,6 +26,13 @@ void Lexer::skip()
         curr_char = input[pos];
 }
 
+char Lexer::la() {
+    if (curr_char == EOF or pos+1 >= input.length())
+        return EOF;
+
+    return input[pos+1];
+}
+
 bool Lexer::match(char x)
 {
     if (curr_char != x) return false;

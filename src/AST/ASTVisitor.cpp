@@ -29,9 +29,16 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::DIV_T:
             case ProgramLexer::AND_T:
             case ProgramLexer::OR_T:
+            case ProgramLexer::EQUALS_T:
+            case ProgramLexer::NEQUALS_T:
+            case ProgramLexer::LEQ_T:
+            case ProgramLexer::GEQ_T:
+            case ProgramLexer::LESS_T:
+            case ProgramLexer::GREATER_T:
                 cast_visit<BinOpNode&>(node, "BinOpNode");
                 break;
             case ProgramLexer::UNMINUS_T:
+            case ProgramLexer::NOT_T:
             case ProgramLexer::DIMENSIONS_T:
             case ProgramLexer::R_T:
             case ProgramLexer::G_T:

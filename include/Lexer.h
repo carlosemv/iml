@@ -26,6 +26,7 @@ protected:
     char curr_char;
 
     explicit Lexer(std::string _in);
+    char la();
     void skip();
     bool match(char x);
     bool match(const std::function<bool()>& predicate);

@@ -38,6 +38,13 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::INTEGER_T, "integer"},
         {ProgramLexer::FLOAT_T, "float"},
         {ProgramLexer::PATH_T, "path"},
+        {ProgramLexer::EQUALS_T, "equals"},
+        {ProgramLexer::NEQUALS_T, "not equals"},
+        {ProgramLexer::LEQ_T, "<="},
+        {ProgramLexer::GEQ_T, ">="},
+        {ProgramLexer::LESS_T, "less"},
+        {ProgramLexer::GREATER_T, "greater"},
+        {ProgramLexer::NOT_T, "not"},
         {ProgramLexer::AND_T, "and"},
         {ProgramLexer::OR_T, "or"},
         {ProgramLexer::TRUE_T, "true"},
@@ -99,6 +106,7 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
             if tok_dict.get("keyword"):
                 cog.outl(map_item.format(tok_id, to_id(tok_id)))
     ]]]*/
+    {"not", NOT_T},
     {"and", AND_T},
     {"or", OR_T},
     {"true", TRUE_T},
@@ -253,10 +261,33 @@ std::optional<Token::t_type> ProgramLexer::char_type()
             return MULT_T;
         case '/':
             return DIV_T;
+        case '<':
+            return LESS_T;
+        case '>':
+            return GREATER_T;
         // [[[end]]]
         default:
             return std::nullopt;
     }
+}
+
+std::optional<Token::t_type> ProgramLexer::comp_type()
+{
+    if (la() == '=') {
+        switch (curr_char)
+        {
+            case '=':
+                return EQUALS_T;
+            case '!':
+                return NEQUALS_T;
+            case '<':
+                return LEQ_T;
+            case '>':
+                return GEQ_T;
+        }
+    }
+
+    return std::nullopt;
 }
 
 Token ProgramLexer::next_token()
@@ -272,6 +303,15 @@ Token ProgramLexer::next_token()
         if (is_space()) {
             skip();
             continue;
+        }
+
+        if (auto comp = comp_type(); comp) {
+            auto l = line;
+            auto c = col;
+            auto p = pos;
+
+            skip(); skip();
+            return Token(comp.value(), text_from(p), l, c);
         }
 
         if (auto t = char_type(); t) {

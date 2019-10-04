@@ -198,6 +198,9 @@ void PythonVisitor::visit(UnOpNode& node)
         if (op.type == ProgramLexer::UNMINUS_T) {
             output << op.text;
             node.expr->visit(*this);
+        } else if (op.type == ProgramLexer::NOT_T) {
+            output << op.text << " ";
+            node.expr->visit(*this);
         } else if (op.type == ProgramLexer::DIMENSIONS_T) {
             node.expr->visit(*this);
             output << ".size";
@@ -249,12 +252,13 @@ void PythonVisitor::visit(BinOpNode& node)
     switch (node.token.value().type) {
         case ProgramLexer::AND_T:
         case ProgramLexer::OR_T:
-            if (lhs.type == ExprType::Bool
-                    and lhs.type == rhs.type) {
-                operation = node.token.value().text;
-            } else {
-                invalid = true;
-            }
+        case ProgramLexer::EQUALS_T:
+        case ProgramLexer::NEQUALS_T:
+        case ProgramLexer::LEQ_T:
+        case ProgramLexer::GEQ_T:
+        case ProgramLexer::LESS_T:
+        case ProgramLexer::GREATER_T:
+            operation = node.token.value().text;
             break;
         case ProgramLexer::PLUS_T:
             if (lhs.type == ExprType::Image

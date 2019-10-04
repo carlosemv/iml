@@ -236,11 +236,17 @@ FullType TypeVisitor::binop_type(Token op,
     FullType lhs, FullType rhs)
 {
     switch (op.type) {
+        case ProgramLexer::AND_T:
+        case ProgramLexer::OR_T:
+            if (lhs.type == rhs.type and
+                    lhs.type == ExprType::Bool)
+                return lhs;
+            break;
         case ProgramLexer::PLUS_T:
             if (lhs.type == rhs.type)
                 return lhs;
             if (lhs.type == ExprType::Image
-                or rhs.type == ExprType::Image) {
+                    or rhs.type == ExprType::Image) {
                 if (rhs.is_num() or lhs.is_num())
                     return FullType(ExprType::Image);
             }

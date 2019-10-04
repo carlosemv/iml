@@ -215,17 +215,26 @@ void PythonVisitor::visit(BinOpNode& node)
     bool invalid = false;
 
     switch (node.token.value().type) {
-       case ProgramLexer::PLUS_T:
+        case ProgramLexer::AND_T:
+        case ProgramLexer::OR_T:
+            if (lhs.type == ExprType::Bool
+                    and lhs.type == rhs.type) {
+                operation = node.token.value().text;
+            } else {
+                invalid = true;
+            }
+            break;
+        case ProgramLexer::PLUS_T:
             if (lhs.type == ExprType::Image
-                and rhs.type == ExprType::Image) {
+                    and rhs.type == ExprType::Image) {
                 func_call = "_add";
             } else if (lhs.is_num() and rhs.is_num()) {
                 operation = "+";
             } else if (lhs.type == rhs.type
-                and lhs.type == ExprType::Path) {
+                    and lhs.type == ExprType::Path) {
                 func_call = "_path_sum";
             } else if (lhs.type == rhs.type
-                and lhs.is_list()) {
+                    and lhs.is_list()) {
                 output << "tuple(_a+_b for _a,_b in zip(";
                 node.lhs->visit(*this);
                 output << ",";
@@ -244,13 +253,13 @@ void PythonVisitor::visit(BinOpNode& node)
                 node.rhs->visit(*this);
                 output << ")";
             } else if (lhs.type == ExprType::Image
-                and rhs.is_num()) {
+                    and rhs.is_num()) {
                 node.lhs->visit(*this);
                 output << ".point(lambda i: i + ";
                 node.rhs->visit(*this);
                 output << ")";
             } else if (rhs.type == ExprType::Image
-                and lhs.is_num()) {
+                    and lhs.is_num()) {
                 node.rhs->visit(*this);
                 output << ".point(lambda i: i + ";
                 node.lhs->visit(*this);
@@ -261,7 +270,7 @@ void PythonVisitor::visit(BinOpNode& node)
             break;
         case ProgramLexer::MINUS_T:
             if (lhs.type == ExprType::Image
-                and rhs.type == ExprType::Image) {
+                    and rhs.type == ExprType::Image) {
                 func_call = "_sub";
             } else if (lhs.is_num() and rhs.is_num()) {
                 operation = "-";
@@ -429,6 +438,11 @@ void PythonVisitor::visit(ScalarNode& node)
             output << "_Path(\"";
             output << node.token.value().text;
             output << "\")";
+        } else if (node.ftype.type == ExprType::Bool) {
+            if (node.token.value().type == ProgramLexer::TRUE_T)
+                output << "True";
+            else
+                output << "False";
         } else {
             output << node.token.value().text;
         }

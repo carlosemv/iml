@@ -281,7 +281,7 @@ std::unique_ptr<ExprNode> ProgramParser::shape_expr()
 
 std::unique_ptr<ExprNode> ProgramParser::expression()
 {
-    std::unique_ptr<ExprNode> root = arith_expr();
+    std::unique_ptr<ExprNode> root = bool_expr();
 
     if (match(ProgramLexer::LPAREN_T)) {
         switch (curr_token.type) {
@@ -308,6 +308,19 @@ std::unique_ptr<ExprNode> ProgramParser::expression()
     return root;
 }
 
+std::unique_ptr<ExprNode> ProgramParser::bool_expr()
+{
+    std::unique_ptr<ExprNode> root = arith_expr();
+
+    Token op_tok = curr_token;
+    while (match({ProgramLexer::AND_T, ProgramLexer::OR_T})) {
+        root = std::make_unique<BinOpNode>(
+            std::move(root), op_tok, arith_expr());
+        op_tok = curr_token;
+    }
+
+    return root;
+}
 
 std::unique_ptr<ExprNode> ProgramParser::arith_expr()
 {
@@ -361,6 +374,8 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
         case ProgramLexer::INTEGER_T:
         case ProgramLexer::FLOAT_T:
         case ProgramLexer::PATH_T:
+        case ProgramLexer::TRUE_T:
+        case ProgramLexer::FALSE_T:
         {
             ExprType type = ExprType::Invalid;
             if (curr_token.type == ProgramLexer::INTEGER_T)
@@ -369,6 +384,8 @@ std::unique_ptr<ExprNode> ProgramParser::primary()
                 type = ExprType::Float;
             else if (curr_token.type == ProgramLexer::PATH_T)
                 type = ExprType::Path;
+            else
+                type = ExprType::Bool;
 
             ScalarNode node(curr_token, type);
             skip();

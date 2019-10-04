@@ -38,6 +38,12 @@ static std::map<Token::t_type, std::string> init_token_names()
         {ProgramLexer::INTEGER_T, "integer"},
         {ProgramLexer::FLOAT_T, "float"},
         {ProgramLexer::PATH_T, "path"},
+        {ProgramLexer::AND_T, "and"},
+        {ProgramLexer::OR_T, "or"},
+        {ProgramLexer::TRUE_T, "true"},
+        {ProgramLexer::FALSE_T, "false"},
+        {ProgramLexer::IF_T, "if"},
+        {ProgramLexer::ELSE_T, "else"},
         {ProgramLexer::PRINT_T, "print"},
         {ProgramLexer::ROTATE_T, "rotate"},
         {ProgramLexer::RESIZE_T, "resize"},
@@ -93,6 +99,12 @@ std::map<std::string, Token::t_type> ProgramLexer::keywords = {
             if tok_dict.get("keyword"):
                 cog.outl(map_item.format(tok_id, to_id(tok_id)))
     ]]]*/
+    {"and", AND_T},
+    {"or", OR_T},
+    {"true", TRUE_T},
+    {"false", FALSE_T},
+    {"if", IF_T},
+    {"else", ELSE_T},
     {"print", PRINT_T},
     {"rotate", ROTATE_T},
     {"resize", RESIZE_T},

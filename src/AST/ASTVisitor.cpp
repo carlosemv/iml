@@ -10,6 +10,8 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::INTEGER_T:
             case ProgramLexer::FLOAT_T:
             case ProgramLexer::PATH_T:
+            case ProgramLexer::TRUE_T:
+            case ProgramLexer::FALSE_T:
                 cast_visit<ScalarNode&>(node, "ScalarNode");
                 break;
             case ProgramLexer::SECTION_T:
@@ -25,6 +27,8 @@ void ASTVisitor::visit(ExprNode& node)
             case ProgramLexer::MINUS_T:
             case ProgramLexer::MULT_T:
             case ProgramLexer::DIV_T:
+            case ProgramLexer::AND_T:
+            case ProgramLexer::OR_T:
                 cast_visit<BinOpNode&>(node, "BinOpNode");
                 break;
             case ProgramLexer::UNMINUS_T:
@@ -57,7 +61,7 @@ void ASTVisitor::visit(ExprNode& node)
                 auto name = ProgramLexer::get_token_name(
                     node.token.value().type);
                 throw CompilerException("Expression has "\
-                    "unkown associated token type \""+name+"\"\n");
+                    "unknown associated token type \""+name+"\"\n");
             }
         }
     } else {

@@ -1,0 +1,11 @@
+red = image in "red_column.png"
+blue = image in "blue_bar.png"
+
+flip red horizontally
+purple = flip red * blue vertically
+purple = purple + blue
+
+center = (0.4, 0.4, 0.6, 0.6)
+center = center * (purple dimensions)
+
+print purple - center

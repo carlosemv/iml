@@ -85,22 +85,14 @@ In [the example script above](/examples/docs/script1.iml) we can see in line 1 t
 
 <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/red_column.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/blue_bar.png" width="200">
 
-Note that grey checkered sections are transparent. Line 4 flips `red` horizontally:
+Note that grey checkered sections are transparent. Line 4 flips `red` horizontally (first image). In line 5 we *compose* (i.e. produce and even blend of) `red` and `blue` (second image); then flip it vertically, and assign it to a new variable called `purple` (third image):
 
-<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/red1.png" width="200">
+<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/red1.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple1.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple2.png" width="200">
 
-Then in line 5 we *compose* (i.e. produce and even blend of) `red` and `blue` (first image); then flip it vertically, and assign it to a new variable called `purple` (second image):
+In line 6 we *overlay* (i.e. paste right hand side image over the left one) `purple` with `blue` (first image). In line 8 we define a section with relative points, then scale them up to image (`purple`) dimensions on line 9.
+In line 11 the section is *removed* from `purple` and the resulting image is displayed (second image):
 
-<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple1.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple2.png" width="200">
-
-In line 6 we *overlay* (i.e. paste right hand side image over the left one) `purple` with `blue`:
-
-<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple3.png" width="200">
-
-In lines 8 we define a section with relative points, then scale them up to image (`purple`) dimensions on line 9.
-In line 11 the section is *removed* from `purple` and the resulting image is displayed:
-
-<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/no_center.png" width="200">
+<img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple3.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/no_center.png" width="200">
 
 ### Image operations
 In lines 4 and 5 we saw our first example of an **image operation**: these are statements that produce one image from another, and that can be used both as expressions, representing the newly produced image, as in line 5; and as commands, altering the original image, as in line 4.
@@ -118,10 +110,10 @@ Regarding the modify operation, there are four possible color attributes which c
 
 Images can also be modified in IML through **unary and binary operators**.
 The unary operators are:
-* unary minus (-), valid only for numbers;
-* boolean negation (not), valid only for boolean expressions;
+* unary minus (`-`), valid only for numbers;
+* boolean negation (`not`), valid only for boolean expressions;
 * 'dimensions' operator, valid only for images; and
-* channel access operators, also only for images, of the form (R), (G), or (B) (e.g. `print purple(R)`).
+* channel access operators, also only for images, of the form `(R)`, `(G)`, or `(B)` (e.g. `print purple(R)`).
 
 <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/binary.png" height="300">
 
@@ -131,7 +123,7 @@ When both operands are images, we have the following operations: with the `+` op
 
 When both operands are of numeric types, we have the usual operations. When both operands are of the same type, and are dimensions or sections, the operation is done numerically, element-wise. We have a similar behaviour (element-wise numerical operation) when one of the operands is a dimenions or section, and the other is numerical. When one of the operands is a dimension and the other is a section, the section is considered to be given as proportions, and `*` produces a section appropriately scaled to the given dimensions.
 
-Finally, when one of the operands is an image and the other is a section, we have the \texttt{-} operator, which removes a section from an image, or removes the image except for the section given, depending on the order of operands.
+Finally, when one of the operands is an image and the other is a section, we have the `-` operator, which removes a section from an image, or removes the image except for the section given, depending on the order of operands.
 
 ### <a name="control"></a> Control structures
 

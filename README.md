@@ -81,7 +81,7 @@ New variables are declared on assignment. Control structures (if-else statements
 11  print purple - center
 ```
 
-In [the example script above](/examples/docs/script1.iml) we can see in line 1 the assignment of an image to a variable called `red`, loaded from a file named 'red\_column.png' (a path), and likewise for `blue` in the following line:
+In [the example script above](/examples/docs/script1.iml) we can see in line 1 the assignment of an image to a variable called `red` (first image), loaded from a file named 'red\_column.png' (a path), and likewise for `blue` (second image) in the following line:
 
 <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/red_column.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/blue_bar.png" width="200">
 

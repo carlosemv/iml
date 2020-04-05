@@ -17,7 +17,19 @@ you can use if you wish to cite this work:
 This implementation currently compiles to Python, with a dependency to the [Pillow/PIL](https://github.com/python-pillow/Pillow)
 library.
 
-## Building
+## Table of Contents
++ [1. Building](#build)
++ [2. Running](#run)
++ [3. Documentation](#docs)
++ [3.1. Types](#types)
++ [3.2. Statements](#statements)
++ [3.3. Preview](#preview)
++ [3.4. Image operations](#image)
++ [3.5. Unary and binary operators](#operators)
++ [3.6. Control structures](#control)
++ [4. Example](#example)
+
+## <a name="build"></a> Building
 IML is written in C++ and built using CMake (>= 3.13):
 ```bash
 mkdir build && cd build
@@ -36,14 +48,14 @@ make install
 ```
 Then add `$HOME/bin` to your `PATH`: `export PATH=$HOME/bin:$PATH`.
 
-## Running
+## <a name="run"></a> Running
 To compile an IML program, run `iml <IML program file> <output file>`, e.g. `iml ex.iml ex.py`.
 Then `python <output file>` (`python ex.py`). As previously mentioned, you'll need a working python
 interpreter with the [Pillow/PIL](https://github.com/python-pillow/Pillow) library installed.
 
-## Documentation
+## <a name="docs"></a> Documentation
 
-### Types
+### <a name="types"></a> Types
 IML has six basic data types:
 * image;
 * usual numeric type (integer or float);
@@ -54,7 +66,7 @@ IML has six basic data types:
 
 Note that when using sections, an image's origin is taken to be its upper left corner.
 
-### Statements
+### <a name="statements"></a> Statements
 All statements in IML are one of:
 * Assignment (e.g. `red = image in "red_column.png"`)
 * Image operation (e.g. `flip red horizontally`)
@@ -65,7 +77,7 @@ All statements in IML are one of:
 
 New variables are declared on assignment. Control structures (if-else statements and for-each loops) are described [here](#control).
 
-### Preview
+### <a name="preview"></a> Preview
 
 ```python
 1   red = image in "red_column.png"
@@ -94,7 +106,7 @@ In line 11 the section is *removed* from `purple` and the resulting image is dis
 
 <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/purple3.png" width="200"> <img src="https://github.com/carlosemv/iml/raw/master/examples/docs/pregen/no_center.png" width="200">
 
-### Image operations
+### <a name="image"></a> Image operations
 In lines 4 and 5 we saw our first example of an **image operation**: these are statements that produce one image from another, and that can be used both as expressions, representing the newly produced image, as in line 5; and as commands, altering the original image, as in line 4.
 
 There are five of these operations:
@@ -106,7 +118,7 @@ There are five of these operations:
 
 Regarding the modify operation, there are four possible color attributes which can be modified: sharpness, contrast, brightness, and color.
 
-### Unary and binary operators
+### <a name="operators"></a> Unary and binary operators
 
 Images can also be modified in IML through **unary and binary operators**.
 The unary operators are:
@@ -126,5 +138,24 @@ When both operands are of numeric types, we have the usual operations. When both
 Finally, when one of the operands is an image and the other is a section, we have the `-` operator, which removes a section from an image, or removes the image except for the section given, depending on the order of operands.
 
 ### <a name="control"></a> Control structures
+If-else statements look like this:
+```python
+if false {
+	print "no"
+} else if 2 > 1 and true {
+	print "yes"
+} else {
+	print "no"
+}
+```
+This program will only print "yes", as might be expected. Pretty self-explanatory.
 
-## Examples
+For-each loops are (currently) used only to iterate over images in a directory. The example below will iterate over the "my/pics/" directory, assigning each image in it to `pic`, and printing it in turn.
+```python
+for pic in "my/pics/" {
+    print pic
+}
+```
+
+## <a name="example"></a> Example
+

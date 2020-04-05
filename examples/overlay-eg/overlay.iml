@@ -1,0 +1,9 @@
+overlay = image in "frame.png"
+
+dir = "imgs"
+for pic in dir {
+	img = image in pic
+	resized = resize overlay to img dimensions
+	img = img + resized
+	save img as pic / "new"
+}

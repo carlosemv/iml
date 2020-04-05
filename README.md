@@ -158,4 +158,17 @@ for pic in "my/pics/" {
 ```
 
 ## <a name="example"></a> Example
+Besides the example given in the ["Preview" section](#preview), there is another in [examples/overlay-eg/overlay.iml](/examples/overlay-eg/overlay.iml):
+```python
+overlay = image in "frame.png"
 
+dir = "imgs"
+for pic in dir {
+	img = image in pic
+	resized = resize overlay to img dimensions
+	img = img + resized
+	save img as pic / "new"
+}
+```
+
+Here we are loading a picture frame image (`overlay`) and applying it in turn to each image in the "imgs" directory (after redimensioning the frame image to the proper dimensions), then saving each resulting image in a "new" subdirectory.

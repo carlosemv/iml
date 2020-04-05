@@ -15,8 +15,10 @@ add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
 # executables
 # --------------------------------------- #
 file(GLOB_RECURSE iml_src
-    "src/*.cpp"
+    "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
 add_executable(iml ${iml_src})
 
 target_include_directories(iml PRIVATE include/)
+
+install(TARGETS iml DESTINATION bin)
